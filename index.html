@@ -124,6 +124,27 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .stock-field .field-value{font-size:13px;color:var(--ts);padding:.5rem 0}
 .stock-total{text-align:right;margin-top:.5rem;font-size:13px;color:var(--ts)}
 .stock-total strong{color:var(--gl);font-weight:400}
+.stock-empty{text-align:center;padding:2rem;font-size:13px;color:var(--tm);font-style:italic}
+.stock-card{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:1rem;margin-bottom:.75rem;position:relative}
+.stock-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.stock-name{font-size:13px;font-weight:500;color:var(--text)}
+.stock-symbol{font-size:11px;color:var(--ts);margin-left:.5rem}
+.stock-price{font-family:var(--fd);font-size:1.4rem;color:var(--gl)}
+.stock-change{font-size:12px;margin-left:.5rem}
+.stock-change.up{color:var(--green)}
+.stock-change.down{color:#E24B4A}
+.stock-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--br)}
+.stock-field label{display:block;font-size:10px;color:var(--ts);margin-bottom:.25rem;letter-spacing:.06em}
+.stock-field input{width:100%;background:var(--s1);border:1px solid var(--br);border-radius:8px;padding:.5rem;font-size:13px;font-family:var(--fu);color:var(--text);outline:none}
+.stock-field input:focus{border-color:var(--gb)}
+.stock-field .field-value{font-size:13px;color:var(--ts);padding:.5rem 0}
+.stock-del{position:absolute;top:.75rem;right:.75rem;background:none;border:none;color:var(--tm);font-size:18px;cursor:pointer;padding:2px 8px;border-radius:6px;transition:color .2s,background .2s}
+.stock-del:hover{color:#E24B4A;background:rgba(226,75,74,.1)}
+.stock-loading{opacity:.6}
+.add-stock-row{display:flex;gap:.75rem;margin-top:1rem;align-items:stretch}
+.add-stock-row input{width:auto;flex:1}
+.btn-add-stock{background:transparent;border:1px solid var(--br);color:var(--ts);border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-family:var(--fu);cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-add-stock:hover{background:var(--gd);color:var(--gl);border-color:var(--gb)}
 
 .total-card{background:linear-gradient(135deg,rgba(201,150,58,.08),rgba(201,150,58,.04));border:1px solid var(--gb);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
 .total-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0}
@@ -237,7 +258,7 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
     <div class="mini-c">
       <div class="mini-l">距目標缺口</div>
       <div class="mini-v" id="mc-gap">—</div>
-      <div class="mini-s">目標 2,000 萬</div>
+      <div class="mini-s">目標 <span id="target-display">2,000</span> 萬</div>
     </div>
   </div>
 
@@ -270,47 +291,13 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
     </div>
 
     <div id="stock-list">
-      <div class="stock-card" data-symbol="0050">
-        <div class="stock-header">
-          <div><span class="stock-name">元大台灣50</span><span class="stock-symbol">0050</span></div>
-          <div class="stock-price" id="price-0050">--</div>
-        </div>
-        <div class="stock-fields">
-          <div class="stock-field">
-            <label>持股數量</label>
-            <input type="number" id="shares-0050" placeholder="0" min="0" oninput="saveAssets()">
-          </div>
-          <div class="stock-field">
-            <label>成本均價</label>
-            <input type="number" id="cost-0050" placeholder="0" step="0.01" oninput="saveAssets()">
-          </div>
-          <div class="stock-field">
-            <label>市值</label>
-            <div class="field-value" id="value-0050">0 元</div>
-          </div>
-        </div>
-      </div>
+      <div class="stock-empty" id="stock-empty">尚無股票持仓<br>點擊下方新增你的股票</div>
+    </div>
 
-      <div class="stock-card" data-symbol="0052">
-        <div class="stock-header">
-          <div><span class="stock-name">富邦科技</span><span class="stock-symbol">0052</span></div>
-          <div class="stock-price" id="price-0052">--</div>
-        </div>
-        <div class="stock-fields">
-          <div class="stock-field">
-            <label>持股數量</label>
-            <input type="number" id="shares-0052" placeholder="0" min="0" oninput="saveAssets()">
-          </div>
-          <div class="stock-field">
-            <label>成本均價</label>
-            <input type="number" id="cost-0052" placeholder="0" step="0.01" oninput="saveAssets()">
-          </div>
-          <div class="stock-field">
-            <label>市值</label>
-            <div class="field-value" id="value-0052">0 元</div>
-          </div>
-        </div>
-      </div>
+    <div class="add-stock-row">
+      <input type="text" id="new-stock-symbol" placeholder="股票代碼，例如 0050" maxlength="10">
+      <input type="text" id="new-stock-name" placeholder="名稱（選填）" maxlength="20">
+      <button class="btn-add-stock" onclick="addStock()">＋ 新增股票</button>
     </div>
 
     <div class="total-card" style="margin-top:1rem">
@@ -363,21 +350,17 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 
   <div class="price-card">
     <div class="price-header">
-      <div class="price-title">系統參數</div>
-      <div class="price-updated">每月投入：<span>39,000 元</span></div>
+      <div class="price-title">系統設定</div>
     </div>
     <div class="price-row" style="flex-wrap:wrap;gap:.75rem">
       <div class="price-field">
-        <label>0050 年化報酬率</label>
-        <input type="number" id="r50-input" value="8" step="0.1" oninput="saveParams()">
-      </div>
-      <div class="price-field">
-        <label>0052 年化報酬率</label>
-        <input type="number" id="r52-input" value="9" step="0.1" oninput="saveParams()">
-      </div>
-      <div class="price-field">
-        <label>年齡</label>
+        <label>目前年齡</label>
         <input type="number" id="age-input" value="31" min="18" max="80" oninput="saveParams()">
+      </div>
+      <div class="price-field">
+        <label>目標金額</label>
+        <input type="number" id="target-input" value="2000" min="100" oninput="saveTarget()">
+        <div class="asset-unit" style="position:static;transform:none;text-align:right;margin-top:.25rem">萬元</div>
       </div>
     </div>
     <div class="stale-warn" id="stale-warn">⚠ 股價已超過 7 天未更新，請點擊「自動更新股價」</div>
@@ -438,27 +421,23 @@ function updateSyncStatus(status, text){
   }
 }
 
-const SHARES50=24778, SHARES52=11000;
-const M50=26000, M52=9000, ML=5000;
-const R50=8, R52=9, RL=3;
 const TARGET=20000000;
-const START_AGE=31, START_YR=2026;
-const DEFAULT_P50=73.95, DEFAULT_P52=43.82;
+const START_YR=2026;
+const RL=3;
 const CIRC=2*Math.PI*56;
 
 const K={
   cash:'asset_cash',other:'asset_other',
-  s50:'asset_s50',s52:'asset_s52',
-  c50:'asset_c50',c52:'asset_c52',
-  r50:'param_r50',r52:'param_r52',age:'param_age',
-  p50:'price_50',p52:'price_52',pdate:'price_date',
-  lumps:'lumps'
+  stocks:'asset_stocks',
+  lumps:'lumps',age:'param_age',target:'param_target'
 };
 
 let localData = {};
 let cloudData = {};
 let dataLoaded = false;
 let saveTimeout = null;
+let stockPrices = {};
+let targetValue = 20000000;
 
 function load(k,def){
   if(cloudData.hasOwnProperty(k)) return cloudData[k];
@@ -480,38 +459,47 @@ function save(k,v){
   }, 500);
 }
 
-function getP50(){return parseFloat(load(K.p50,DEFAULT_P50))||DEFAULT_P50;}
-function getP52(){return parseFloat(load(K.p52,DEFAULT_P52))||DEFAULT_P52;}
+function getStocks(){return load(K.stocks,[])||[];}
+function getStock(symbol){const s=getStocks();return s.find(x=>x.symbol===symbol)||null;}
 function getLumps(){return load(K.lumps,[])||[];}
 function getTotalLump(){return getLumps().reduce((s,i)=>s+i.amount,0);}
-function getR50(){return parseFloat(load(K.r50,R50))||R50;}
-function getR52(){return parseFloat(load(K.r52,R52))||R52;}
-function getAge(){return parseInt(load(K.age,START_AGE))||START_AGE;}
+function getAge(){return parseInt(load(K.age,31))||31;}
 function getCash(){return parseFloat(load(K.cash,0))||0;}
 function getOther(){return parseFloat(load(K.other,0))||0;}
-function getShares(sym){return parseInt(load(sym==='0050'?K.s50:K.s52,0))||0;}
-function getCost(sym){return parseFloat(load(sym==='0050'?K.c50:K.c52,0))||0;}
 
-function saveAssets(){
-  const cash = parseFloat(document.getElementById('cash-input').value)||0;
-  const other = parseFloat(document.getElementById('other-input').value)||0;
-  const s50 = parseInt(document.getElementById('shares-0050').value)||0;
-  const s52 = parseInt(document.getElementById('shares-0052').value)||0;
-  const c50 = parseFloat(document.getElementById('cost-0050').value)||0;
-  const c52 = parseFloat(document.getElementById('cost-0052').value)||0;
-  save(K.cash, cash);
-  save(K.other, other);
-  save(K.s50, s50);
-  save(K.s52, s52);
-  save(K.c50, c50);
-  save(K.c52, c52);
+function getStockPrice(symbol){return stockPrices[symbol]||null;}
+function setStockPrice(symbol,price){stockPrices[symbol]=price;}
+
+function saveStocks(){
+  const stocks=getStocks();
+  stocks.forEach(s=>{
+    const sharesEl=document.getElementById('shares-'+s.symbol);
+    const costEl=document.getElementById('cost-'+s.symbol);
+    const monthlyEl=document.getElementById('monthly-'+s.symbol);
+    const returnEl=document.getElementById('return-'+s.symbol);
+    if(sharesEl)s.shares=parseInt(sharesEl.value)||0;
+    if(costEl)s.cost=parseFloat(costEl.value)||0;
+    if(monthlyEl)s.monthly=parseInt(monthlyEl.value)||0;
+    if(returnEl)s.return=parseFloat(returnEl.value)||8;
+  });
+  save(K.stocks,stocks);
   render();
 }
 
 function saveParams(){
-  save(K.r50, parseFloat(document.getElementById('r50-input').value)||R50);
-  save(K.r52, parseFloat(document.getElementById('r52-input').value)||R52);
-  save(K.age, parseInt(document.getElementById('age-input').value)||START_AGE);
+  save(K.age, parseInt(document.getElementById('age-input').value)||31);
+  save(K.target, (parseFloat(document.getElementById('target-input').value)||2000)*10000);
+  targetValue = load(K.target, 20000000);
+  render();
+}
+
+function getTarget(){
+  return targetValue;
+}
+
+function saveCashOther(){
+  save(K.cash, parseFloat(document.getElementById('cash-input').value)||0);
+  save(K.other, parseFloat(document.getElementById('other-input').value)||0);
   render();
 }
 
@@ -521,28 +509,45 @@ function grow(p,r,yr){return p*Math.pow(1+r/100,yr);}
 function calcTotal(months,extraLump=0){
   const yr=months/12;
   const cash=getCash(),other=getOther();
-  const shares50=getShares('0050'),shares52=getShares('0052');
-  const p50=getP50(),p52=getP52();
-  const r50=getR50(),r52=getR52();
   const lump=getTotalLump()+extraLump;
-  const stocks=grow(shares50*p50,r50,yr)+grow(shares52*p52,r52,yr);
-  const base=grow(cash+other,r50,yr);
-  return stocks+base+(lump?grow(lump,r50,yr):0)+fv(M50,r50,months)+fv(M52,r52,months)+fv(ML,RL,months);
+  const stocks=getStocks();
+  
+  let stockValue=0;
+  let monthlyTotal=0;
+  stocks.forEach(s=>{
+    const price=getStockPrice(s.symbol)||s.cost||0;
+    const r=s.return||8;
+    stockValue+=grow(s.shares*price,r,yr);
+    monthlyTotal+=fv(s.monthly||0,r,months);
+  });
+  
+  const base=grow(cash+other,8,yr);
+  return stockValue+base+(lump?grow(lump,8,yr):0)+monthlyTotal;
 }
 
 function findMonths(extraLump=0){
-  for(let mo=0;mo<=360;mo++){if(calcTotal(mo,extraLump)>=TARGET)return mo;}
+  for(let mo=0;mo<=360;mo++){if(calcTotal(mo,extraLump)>=getTarget())return mo;}
   return 360;
 }
 
 function currentValue(){
-  const shares50=getShares('0050'),shares52=getShares('0052');
-  return shares50*getP50()+shares52*getP52()+getCash()+getOther()+getTotalLump();
+  const stocks=getStocks();
+  let total=getCash()+getOther();
+  stocks.forEach(s=>{
+    const price=getStockPrice(s.symbol)||s.cost||0;
+    total+=s.shares*price;
+  });
+  return total+getTotalLump();
 }
 
-function stockValue(sym){
-  const shares=getShares(sym),price=sym==='0050'?getP50():getP52();
-  return shares*price;
+function totalStockValue(){
+  const stocks=getStocks();
+  let total=0;
+  stocks.forEach(s=>{
+    const price=getStockPrice(s.symbol)||s.cost||0;
+    total+=s.shares*price;
+  });
+  return total;
 }
 
 function fmt(n){return Math.round(n).toLocaleString('zh-TW');}
@@ -586,12 +591,68 @@ function updateChart(){
   for(let y=0;y<=22;y++){
     labels.push((age+y)+'歲');
     data.push(Math.round(calcTotal(y*12)));
-    target.push(TARGET);
+    target.push(getTarget());
   }
   chart.data.labels=labels;
   chart.data.datasets[0].data=data;
   chart.data.datasets[1].data=target;
   chart.update('none');
+}
+
+function renderStockList(){
+  const list=document.getElementById('stock-list');
+  const stocks=getStocks();
+  
+  if(stocks.length===0){
+    list.innerHTML='<div class="stock-empty">尚無股票持倉<br>點擊下方新增你的股票</div>';
+    return;
+  }
+  
+  list.innerHTML='';
+  stocks.forEach(s=>{
+    const price=getStockPrice(s.symbol);
+    const value=s.shares*(price||s.cost||0);
+    const priceDisplay=price?price.toFixed(2):'--';
+    
+    const div=document.createElement('div');
+    div.className='stock-card';
+    div.innerHTML=`
+      <button class="stock-del" onclick="deleteStock('${s.symbol}')" title="刪除">×</button>
+      <div class="stock-header">
+        <div><span class="stock-name">${s.name||s.symbol}</span><span class="stock-symbol">${s.symbol}</span></div>
+        <div class="stock-price" id="price-${s.symbol}">${priceDisplay}</div>
+      </div>
+      <div class="stock-fields">
+        <div class="stock-field">
+          <label>持股數量</label>
+          <input type="number" id="shares-${s.symbol}" value="${s.shares||''}" placeholder="0" min="0" oninput="saveStocks()">
+        </div>
+        <div class="stock-field">
+          <label>成本均價</label>
+          <input type="number" id="cost-${s.symbol}" value="${s.cost||''}" placeholder="0" step="0.01" oninput="saveStocks()">
+        </div>
+        <div class="stock-field">
+          <label>市值</label>
+          <div class="field-value">${fmt(value)} 元</div>
+        </div>
+      </div>
+      <div class="stock-fields" style="border-top:none;padding-top:0;margin-top:.5rem">
+        <div class="stock-field">
+          <label>月定期定額</label>
+          <input type="number" id="monthly-${s.symbol}" value="${s.monthly||''}" placeholder="0" min="0" oninput="saveStocks()">
+        </div>
+        <div class="stock-field">
+          <label>年化報酬率 %</label>
+          <input type="number" id="return-${s.symbol}" value="${s.return||8}" placeholder="8" step="0.1" min="0" max="30" oninput="saveStocks()">
+        </div>
+        <div class="stock-field">
+          <label>總投入</label>
+          <div class="field-value">${fmt(s.shares*s.cost||0)} 元</div>
+        </div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
 }
 
 function render(){
@@ -614,13 +675,13 @@ function render(){
     `${Math.floor(moLeft/12)} 年${moRemain?` ${moRemain} 個月`:''}`;
   document.getElementById('hero-now').textContent=fmtM(currentValue());
 
-  const pct=Math.min(currentValue()/TARGET,1);
+  const pct=Math.min(currentValue()/getTarget(),1);
   const offset=CIRC*(1-pct);
   document.getElementById('ring').style.strokeDashoffset=offset;
   document.getElementById('ring-pct').textContent=Math.round(pct*100)+'%';
 
-  const cash=getCash(),other=getOther(),shares50=getShares('0050'),shares52=getShares('0052');
-  const totalStocks=stockValue('0050')+stockValue('0052');
+  const cash=getCash(),other=getOther();
+  const totalStocks=totalStockValue();
   const grandTotal=cash+other+totalStocks;
 
   document.getElementById('mc-total').textContent=fmtM(grandTotal);
@@ -628,21 +689,20 @@ function render(){
   const totalL=getTotalLump();
   document.getElementById('mc-lump').textContent=totalL?fmt(totalL)+'元':'0 元';
   document.getElementById('mc-lump-count').textContent=lumps.length?`共 ${lumps.length} 筆`:'尚未加碼';
-  document.getElementById('mc-gap').textContent=fmtM(Math.max(TARGET-grandTotal,0));
+  document.getElementById('mc-gap').textContent=fmtM(Math.max(getTarget()-grandTotal,0));
+  document.getElementById('target-display').textContent=(getTarget()/10000).toFixed(0);
 
   document.getElementById('total-cash').textContent=fmt(cash)+' 元';
   document.getElementById('total-stocks').textContent=fmt(totalStocks)+' 元';
   document.getElementById('total-other').textContent=fmt(other)+' 元';
   document.getElementById('grand-total').textContent=fmt(grandTotal)+' 元';
 
-  document.getElementById('value-0050').textContent=fmt(stockValue('0050'))+' 元';
-  document.getElementById('value-0052').textContent=fmt(stockValue('0052'))+' 元';
-
-  const pdate=load(K.pdate,'');
+  const pdate=load('price_date','');
   document.getElementById('price-date').textContent=pdate?new Date(pdate).toLocaleDateString('zh-TW'):'未設定';
   const stale=pdate&&daysSince(pdate)>7;
   document.getElementById('stale-warn').style.display=stale?'block':'none';
 
+  renderStockList();
   renderHistory();
   updateChart();
 }
@@ -745,31 +805,72 @@ async function fetchAllPrices(){
   const spinner=btn.querySelector('.spinner');
   btn.classList.add('loading');
   spinner.style.display='inline-block';
+  btn.childNodes[2].textContent='更新中...';
 
-  const [result50,result52]=await Promise.all([
-    fetchStockPrice('0050'),
-    fetchStockPrice('0052')
-  ]);
-
-  if(result50.success)save(K.p50,result50.price);
-  if(result52.success)save(K.p52,result52.price);
+  const stocks=getStocks();
+  const results=await Promise.all(stocks.map(s=>fetchStockPrice(s.symbol)));
   
-  document.getElementById('price-0050').textContent=result50.success?result50.price.toFixed(2):'--';
-  document.getElementById('price-0052').textContent=result52.success?result52.price.toFixed(2):'--';
+  let hasSuccess=false;
+  stocks.forEach((s,i)=>{
+    if(results[i].success){
+      setStockPrice(s.symbol,results[i].price);
+      hasSuccess=true;
+    }
+    const priceEl=document.getElementById('price-'+s.symbol);
+    if(priceEl){
+      priceEl.textContent=results[i].success?results[i].price.toFixed(2):'--';
+    }
+  });
 
-  if(result50.success||result52.success){
-    save(K.pdate,new Date().toISOString().slice(0,10));
+  if(hasSuccess){
+    save('price_date',new Date().toISOString().slice(0,10));
   }
 
   spinner.style.display='none';
   btn.classList.remove('loading');
+  btn.childNodes[2].textContent='';
 
-  if(result50.success&&result52.success){
-    btn.textContent='✓ 已更新';
+  if(hasSuccess){
+    btn.innerHTML='<span class="spinner" style="display:none"></span><span class="spinner" style="display:none"></span>✓ 已更新';
     btn.style.color='var(--green)';
-    setTimeout(()=>{btn.textContent='自動更新股價';btn.style.color='';},2000);
+    setTimeout(()=>{
+      btn.innerHTML='<span class="spinner" style="display:none"></span><span class="spinner" style="display:none"></span>自動更新股價';
+      btn.style.color='';
+    },2000);
   }
 
+  render();
+}
+
+function addStock(){
+  const symbolInput=document.getElementById('new-stock-symbol');
+  const nameInput=document.getElementById('new-stock-name');
+  const symbol=symbolInput.value.trim().toUpperCase();
+  if(!symbol){
+    symbolInput.style.borderColor='rgba(226,75,74,.5)';
+    setTimeout(()=>symbolInput.style.borderColor='',1500);
+    return;
+  }
+  
+  const stocks=getStocks();
+  if(stocks.find(s=>s.symbol===symbol)){
+    alert('此股票已存在');
+    return;
+  }
+  
+  const name=nameInput.value.trim();
+  stocks.push({symbol,name,cost:0,shares:0,monthly:0,return:8});
+  save(K.stocks,stocks);
+  
+  symbolInput.value='';
+  nameInput.value='';
+  render();
+}
+
+function deleteStock(symbol){
+  const stocks=getStocks().filter(s=>s.symbol!==symbol);
+  save(K.stocks,stocks);
+  delete stockPrices[symbol];
   render();
 }
 
@@ -780,22 +881,17 @@ function loadAllData(){
       if(v!==null) localData[k]=JSON.parse(v);
     }catch{}
   }
+  targetValue = load(K.target, 20000000);
 }
 
 function initUI(){
   document.getElementById('cash-input').value=getCash()||'';
   document.getElementById('other-input').value=getOther()||'';
-  document.getElementById('shares-0050').value=getShares('0050')||'';
-  document.getElementById('shares-0052').value=getShares('0052')||'';
-  document.getElementById('cost-0050').value=getCost('0050')||'';
-  document.getElementById('cost-0052').value=getCost('0052')||'';
-  document.getElementById('r50-input').value=getR50();
-  document.getElementById('r52-input').value=getR52();
   document.getElementById('age-input').value=getAge();
+  document.getElementById('target-input').value=(getTarget()/10000).toFixed(0);
 
-  const p50=getP50(),p52=getP52();
-  document.getElementById('price-0050').textContent=p50!==DEFAULT_P50?p50.toFixed(2):'--';
-  document.getElementById('price-0052').textContent=p52!==DEFAULT_P52?p52.toFixed(2):'--';
+  document.getElementById('cash-input').addEventListener('input',saveCashOther);
+  document.getElementById('other-input').addEventListener('input',saveCashOther);
 
   const inp=document.getElementById('lump-input');
   inp.addEventListener('input',()=>{
@@ -806,14 +902,17 @@ function initUI(){
     const moBefore=findMonths(0);
     const moAfter=findMonths(amt);
     const daysSaved=Math.round((moBefore-moAfter)/12*365);
-    const fv50=grow(amt,getR50(),19);
+    const fvVal=grow(amt,8,19);
     const newAge=Math.floor(getAge()+moAfter/12);
     const t=fmtDays(daysSaved);
     document.getElementById('prev-days').textContent=t.val+' '+t.unit;
-    document.getElementById('prev-fv').textContent=fmtM0(fv50);
+    document.getElementById('prev-fv').textContent=fmtM0(fvVal);
     document.getElementById('prev-age').textContent=newAge+' 歲';
   });
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')addLump();});
+
+  const symbolInput=document.getElementById('new-stock-symbol');
+  symbolInput.addEventListener('keydown',e=>{if(e.key==='Enter')addStock();});
 
   initChart();
   dataLoaded = true;
