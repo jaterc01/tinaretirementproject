@@ -112,7 +112,7 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .btn-refresh .spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--ts);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin-right:.5rem;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.stock-card{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:1rem;margin-bottom:.75rem}
+.stock-card{background:var(--s2);border:1px solid rgba(0,0,0,.10);border-radius:12px;padding:1rem;margin-bottom:.75rem;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .stock-card:last-child{margin-bottom:0}
 .stock-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
 .stock-name{font-size:13px;font-weight:500;color:var(--text)}
@@ -128,8 +128,8 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .stock-field .field-value{font-size:13px;color:var(--ts);padding:.5rem 0}
 .stock-total{text-align:right;margin-top:.5rem;font-size:13px;color:var(--ts)}
 .stock-total strong{color:var(--gl);font-weight:400}
-.stock-empty{text-align:center;padding:2rem;font-size:13px;color:var(--tm);font-style:italic}
-.stock-card{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:1rem;margin-bottom:.75rem;position:relative}
+.stock-empty{text-align:center;padding:2rem;font-size:13px;color:var(--ts);font-style:italic}
+.stock-card{background:var(--s2);border:1px solid rgba(0,0,0,.10);border-radius:12px;padding:1rem;margin-bottom:.75rem;position:relative;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .stock-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
 .stock-name{font-size:13px;font-weight:500;color:var(--text)}
 .stock-symbol{font-size:11px;color:var(--ts);margin-left:.5rem}
@@ -142,7 +142,7 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .stock-field input{width:100%;background:var(--s1);border:1px solid var(--br);border-radius:8px;padding:.5rem;font-size:13px;font-family:var(--fu);color:var(--text);outline:none}
 .stock-field input:focus{border-color:var(--gb)}
 .stock-field .field-value{font-size:13px;color:var(--ts);padding:.5rem 0}
-.stock-del{position:absolute;top:.75rem;right:.75rem;background:none;border:none;color:var(--tm);font-size:18px;cursor:pointer;padding:2px 8px;border-radius:6px;transition:color .2s,background .2s}
+.stock-del{position:absolute;top:.75rem;right:.75rem;background:none;border:none;color:var(--ts);font-size:18px;cursor:pointer;padding:2px 8px;border-radius:6px;transition:color .2s,background .2s}
 .stock-del:hover{color:#E24B4A;background:rgba(226,75,74,.1)}
 .stock-loading{opacity:.6}
 .add-stock-row{display:flex;gap:.5rem;margin-top:1rem;align-items:stretch;flex-wrap:wrap}
@@ -369,7 +369,7 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
       </div>
       <div class="price-field">
         <label>目標金額</label>
-        <input type="number" id="target-input" value="2000" min="100" oninput="saveTarget()">
+        <input type="number" id="target-input" value="2000" min="100" oninput="saveParams()">
         <div class="asset-unit" style="position:static;transform:none;text-align:right;margin-top:.25rem">萬元</div>
       </div>
     </div>
