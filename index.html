@@ -279,6 +279,7 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
           <span class="spinner" style="display:none"></span>
           自動更新股價
         </button>
+        <button class="btn-refresh" onclick="clearStocks()" style="color:#E24B4A;border-color:rgba(226,75,74,.3)">清除股票</button>
       </div>
     </div>
     
@@ -477,9 +478,11 @@ function localSave(){
   });
 }
 
-function getStocks(){return load(K.stocks,[])||[];}
+function toArr(v){if(Array.isArray(v))return v;if(v&&typeof v==='object')return Object.values(v);return[];}
+function getStocks(){return toArr(load(K.stocks,[]));}
 function getStock(symbol){const s=getStocks();return s.find(x=>x.symbol===symbol)||null;}
-function getLumps(){return load(K.lumps,[])||[];}
+function getLumps(){return toArr(load(K.lumps,[]));}
+function clearStocks(){if(confirm('確定要清除所有股票資料嗎？')){{save(K.stocks,[]);render();}}}
 function getTotalLump(){return getLumps().reduce((s,i)=>s+i.amount,0);}
 function getAge(){return parseInt(load(K.age,31))||31;}
 function getCash(){return parseFloat(load(K.cash,0))||0;}
@@ -656,10 +659,11 @@ function renderStockList(){
   
   list.innerHTML='';
   stocks.forEach(s=>{
+    try{
     const price=getStockPrice(s.symbol);
     const value=s.shares*(price||s.cost||0);
     const priceDisplay=price?price.toFixed(2):'--';
-    
+
     const div=document.createElement('div');
     div.className='stock-card';
     div.innerHTML=`
@@ -709,6 +713,7 @@ function renderStockList(){
       </div>
     `;
     list.appendChild(div);
+    }catch(e){console.error('renderStock error',s,e);}
   });
 }
 
