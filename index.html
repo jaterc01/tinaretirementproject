@@ -83,9 +83,10 @@ input[type=text],input[type=search]{width:100%;background:var(--bg);border:1px s
 input[type=text]:focus,input[type=search]:focus{border-color:rgba(201,150,58,.4)}
 input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .input-unit{position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ts)}
-.lump-select{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:.65rem 1rem;font-size:13px;font-family:var(--fu);color:var(--text);outline:none;min-width:120px;cursor:pointer}
-.lump-select:focus{border-color:var(--gold)}
+.lump-select{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:.65rem 1rem;font-size:13px;font-family:var(--fu);color:var(--text);outline:none;min-width:130px;cursor:pointer}
+.lump-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,150,58,.12)}
 .lump-select option{background:var(--s1);color:var(--text)}
+.lump-select:hover{border-color:var(--gb)}
 .note-wrap{margin-top:.75rem}
 .btn-add{background:var(--gold);color:#07090F;border:none;border-radius:12px;padding:.85rem 1.5rem;font-size:14px;font-family:var(--fu);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .2s,transform .1s}
 .btn-add:hover{background:var(--gl)}
@@ -325,13 +326,13 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 
   <div class="input-card">
     <div class="input-title">今天多存一筆錢</div>
-    <div class="input-row">
-      <div class="input-wrap">
+    <div class="input-row" style="flex-wrap:wrap">
+      <div class="input-wrap" style="flex:1;min-width:150px">
         <input type="number" id="lump-input" placeholder="輸入金額，例如 10000" min="1" step="1000">
         <span class="input-unit">元</span>
       </div>
       <select id="lump-stock" class="lump-select">
-        <option value="">投入總資產</option>
+        <option value="">→ 選擇股票</option>
       </select>
       <button class="btn-add" onclick="addLump()">加入 →</button>
     </div>
