@@ -647,75 +647,91 @@ function updateStockSelect(){
   }
 }
 
+function buildStockCard(s){
+  const sym   = String(s.symbol||'');
+  const price = getStockPrice(sym);
+  const shares= Number(s.shares)||0;
+  const cost  = Number(s.cost)||0;
+  const value = shares*(price||cost||0);
+  const dcaType = s.dca_type||'amount';
+  const dcaFreq = Number(s.dca_freq)||1;
+  const monthly = Number(s.monthly)||0;
+  const retRate = Number(s.return)||8;
+
+  const card = document.createElement('div');
+  card.className = 'stock-card';
+
+  /* ── header ── */
+  const hdr = document.createElement('div');
+  hdr.className = 'stock-header';
+  hdr.innerHTML =
+    `<div><span class="stock-name">${s.name||sym}</span>`+
+    `<span class="stock-symbol">&nbsp;${sym}</span></div>`+
+    `<div style="display:flex;align-items:center;gap:.5rem">`+
+    `<span class="stock-price" id="price-${sym}">${price?price.toFixed(2):'--'}</span>`+
+    `<button class="stock-del" onclick="deleteStock('${sym}')" title="刪除">×</button></div>`;
+  card.appendChild(hdr);
+
+  /* ── row 1: shares / cost / value ── */
+  const r1 = document.createElement('div');
+  r1.className = 'stock-fields';
+  [
+    ['持股數量', `<input type="number" id="shares-${sym}" value="${shares||''}" placeholder="0" min="0" oninput="saveStocks()">`],
+    ['成本均價', `<input type="number" id="cost-${sym}"   value="${cost||''}"   placeholder="0" step="0.01" oninput="saveStocks()">`],
+    ['市值',     `<div class="field-value">${fmt(value)} 元</div>`],
+  ].forEach(([lbl,body])=>{
+    const f=document.createElement('div'); f.className='stock-field';
+    f.innerHTML=`<label>${lbl}</label>${body}`; r1.appendChild(f);
+  });
+  card.appendChild(r1);
+
+  /* ── row 2: DCA settings ── */
+  const r2 = document.createElement('div');
+  r2.className = 'stock-fields';
+  r2.style.cssText = 'border-top:none;padding-top:0;margin-top:.5rem';
+
+  const dcaWrap = document.createElement('div');
+  dcaWrap.className = 'stock-field';
+  dcaWrap.style.gridColumn = '1/-1';
+  dcaWrap.innerHTML =
+    `<label>定期投入設定</label>`+
+    `<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.3rem">`+
+      `<select id="dca-type-${sym}" class="lump-select" style="min-width:110px" onchange="saveStocks()">`+
+        `<option value="amount"${dcaType==='amount'?' selected':''}>定期定額（元）</option>`+
+        `<option value="shares"${dcaType==='shares'?' selected':''}>定期定股（股）</option>`+
+      `</select>`+
+      `<input type="number" id="monthly-${sym}" value="${monthly||''}" placeholder="${dcaType==='shares'?'每期股數':'每期金額'}" min="0" style="flex:1;min-width:90px" oninput="saveStocks()">`+
+      `<select id="dca-freq-${sym}" class="lump-select" style="min-width:80px" onchange="saveStocks()">`+
+        `<option value="1"${dcaFreq===1?' selected':''}>每月</option>`+
+        `<option value="3"${dcaFreq===3?' selected':''}>每季</option>`+
+        `<option value="12"${dcaFreq===12?' selected':''}>每年</option>`+
+      `</select>`+
+    `</div>`;
+  r2.appendChild(dcaWrap);
+
+  [
+    ['年化報酬率 %', `<input type="number" id="return-${sym}" value="${retRate}" placeholder="8" step="0.1" min="0" max="30" oninput="saveStocks()">`],
+    ['總投入成本',   `<div class="field-value">${fmt(shares*cost)} 元</div>`],
+  ].forEach(([lbl,body])=>{
+    const f=document.createElement('div'); f.className='stock-field';
+    f.innerHTML=`<label>${lbl}</label>${body}`; r2.appendChild(f);
+  });
+  card.appendChild(r2);
+
+  return card;
+}
+
 function renderStockList(){
-  const list=document.getElementById('stock-list');
-  const stocks=getStocks();
-  
+  const list   = document.getElementById('stock-list');
+  const stocks = getStocks();
   updateStockSelect();
-  
-  if(stocks.length===0){
-    list.innerHTML='<div class="stock-empty">尚無股票持倉<br>點擊下方新增你的股票</div>';
+  list.innerHTML = '';
+
+  if(!stocks.length){
+    list.innerHTML = '<div class="stock-empty">尚無股票持倉<br>在下方新增你的股票</div>';
     return;
   }
-  
-  list.innerHTML='';
-  stocks.forEach(s=>{
-    try{
-    const price=getStockPrice(s.symbol);
-    const value=s.shares*(price||s.cost||0);
-    const priceDisplay=price?price.toFixed(2):'--';
-
-    const div=document.createElement('div');
-    div.className='stock-card';
-    div.innerHTML=`
-      <button class="stock-del" onclick="deleteStock('${s.symbol}')" title="刪除">×</button>
-      <div class="stock-header">
-        <div><span class="stock-name">${s.name||s.symbol}</span><span class="stock-symbol">${s.symbol}</span></div>
-        <div class="stock-price" id="price-${s.symbol}">${priceDisplay}</div>
-      </div>
-      <div class="stock-fields">
-        <div class="stock-field">
-          <label>持股數量</label>
-          <input type="number" id="shares-${s.symbol}" value="${s.shares||''}" placeholder="0" min="0" oninput="saveStocks()">
-        </div>
-        <div class="stock-field">
-          <label>成本均價</label>
-          <input type="number" id="cost-${s.symbol}" value="${s.cost||''}" placeholder="0" step="0.01" oninput="saveStocks()">
-        </div>
-        <div class="stock-field">
-          <label>市值</label>
-          <div class="field-value">${fmt(value)} 元</div>
-        </div>
-      </div>
-      <div class="stock-fields" style="border-top:none;padding-top:0;margin-top:.5rem">
-        <div class="stock-field" style="grid-column:1/-1">
-          <label>定期投入設定</label>
-          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.25rem">
-            <select id="dca-type-${s.symbol}" class="lump-select" style="min-width:110px" onchange="saveStocks()">
-              <option value="amount" ${(s.dca_type||'amount')==='amount'?'selected':''}>定期定額</option>
-              <option value="shares" ${s.dca_type==='shares'?'selected':''}>定期定股</option>
-            </select>
-            <input type="number" id="monthly-${s.symbol}" value="${s.monthly||''}" placeholder="金額/股數" min="0" style="flex:1;min-width:90px" oninput="saveStocks()">
-            <select id="dca-freq-${s.symbol}" class="lump-select" style="min-width:90px" onchange="saveStocks()">
-              <option value="1" ${(s.dca_freq||1)===1?'selected':''}>每月</option>
-              <option value="3" ${s.dca_freq===3?'selected':''}>每季</option>
-              <option value="12" ${s.dca_freq===12?'selected':''}>每年</option>
-            </select>
-          </div>
-        </div>
-        <div class="stock-field">
-          <label>年化報酬率 %</label>
-          <input type="number" id="return-${s.symbol}" value="${s.return||8}" placeholder="8" step="0.1" min="0" max="30" oninput="saveStocks()">
-        </div>
-        <div class="stock-field">
-          <label>總投入成本</label>
-          <div class="field-value">${fmt(s.shares*(s.cost||0))} 元</div>
-        </div>
-      </div>
-    `;
-    list.appendChild(div);
-    }catch(e){console.error('renderStock error',s,e);}
-  });
+  stocks.forEach(s=>{ try{ list.appendChild(buildStockCard(s)); }catch(e){ console.error('stock render error',s,e); } });
 }
 
 function render(){
