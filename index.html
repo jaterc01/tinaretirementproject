@@ -83,6 +83,9 @@ input[type=text],input[type=search]{width:100%;background:var(--bg);border:1px s
 input[type=text]:focus,input[type=search]:focus{border-color:rgba(201,150,58,.4)}
 input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .input-unit{position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ts)}
+.lump-select{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:.65rem 1rem;font-size:13px;font-family:var(--fu);color:var(--text);outline:none;min-width:120px;cursor:pointer}
+.lump-select:focus{border-color:var(--gold)}
+.lump-select option{background:var(--s1);color:var(--text)}
 .note-wrap{margin-top:.75rem}
 .btn-add{background:var(--gold);color:#07090F;border:none;border-radius:12px;padding:.85rem 1.5rem;font-size:14px;font-family:var(--fu);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .2s,transform .1s}
 .btn-add:hover{background:var(--gl)}
@@ -280,12 +283,12 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
     <div class="asset-grid">
       <div class="asset-field">
         <label>現金存款</label>
-        <input type="number" id="cash-input" placeholder="0" min="0" oninput="saveAssets()">
+        <input type="number" id="cash-input" placeholder="0" min="0" oninput="saveCashOther()">
         <div class="asset-unit">元</div>
       </div>
       <div class="asset-field">
         <label>其他資產</label>
-        <input type="number" id="other-input" placeholder="0" min="0" oninput="saveAssets()">
+        <input type="number" id="other-input" placeholder="0" min="0" oninput="saveCashOther()">
         <div class="asset-unit">元</div>
       </div>
     </div>
@@ -327,6 +330,9 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
         <input type="number" id="lump-input" placeholder="輸入金額，例如 10000" min="1" step="1000">
         <span class="input-unit">元</span>
       </div>
+      <select id="lump-stock" class="lump-select">
+        <option value="">投入總資產</option>
+      </select>
       <button class="btn-add" onclick="addLump()">加入 →</button>
     </div>
     <div class="note-wrap">
@@ -448,6 +454,7 @@ function load(k,def){
 function save(k,v){
   cloudData[k] = v;
   localData[k] = v;
+  try{localStorage.setItem(k,JSON.stringify(v));}catch{}
   if(saveTimeout) clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => {
     updateSyncStatus('syncing');
@@ -457,6 +464,12 @@ function save(k,v){
       updateSyncStatus('offline');
     });
   }, 500);
+}
+
+function localSave(){
+  Object.keys(cloudData).forEach(k=>{
+    try{localStorage.setItem(k,JSON.stringify(cloudData[k]));}catch{}
+  });
 }
 
 function getStocks(){return load(K.stocks,[])||[];}
@@ -599,9 +612,25 @@ function updateChart(){
   chart.update('none');
 }
 
+function updateStockSelect(){
+  const select=document.getElementById('lump-stock');
+  const stocks=getStocks();
+  const currentValue=select.value;
+  select.innerHTML='<option value="">投入總資產</option>';
+  stocks.forEach(s=>{
+    const display=s.name?s.symbol+' - '+s.name:s.symbol;
+    select.innerHTML+=`<option value="${s.symbol}">${display}</option>`;
+  });
+  if(currentValue && stocks.find(s=>s.symbol===currentValue)){
+    select.value=currentValue;
+  }
+}
+
 function renderStockList(){
   const list=document.getElementById('stock-list');
   const stocks=getStocks();
+  
+  updateStockSelect();
   
   if(stocks.length===0){
     list.innerHTML='<div class="stock-empty">尚無股票持倉<br>點擊下方新增你的股票</div>';
@@ -747,14 +776,26 @@ function addLump(){
     return;
   }
   const note=document.getElementById('note-input').value.trim();
+  const stockSymbol=document.getElementById('lump-stock').value;
 
   const moBefore=findMonths(0);
   const moAfter=findMonths(amt);
   const daysSaved=Math.round((moBefore-moAfter)/12*365);
 
-  const lumps=getLumps();
-  lumps.push({amount:amt,note,date:new Date().toISOString().slice(0,10),daysSaved});
-  save(K.lumps,lumps);
+  if(stockSymbol){
+    const stocks=getStocks();
+    const stock=stocks.find(s=>s.symbol===stockSymbol);
+    if(stock){
+      const price=stock.cost||getStockPrice(stockSymbol)||stock.cost||100;
+      const additionalShares=Math.floor(amt/price);
+      stock.shares=(stock.shares||0)+additionalShares;
+      save(K.stocks,stocks);
+    }
+  } else {
+    const lumps=getLumps();
+    lumps.push({amount:amt,note,date:new Date().toISOString().slice(0,10),daysSaved});
+    save(K.lumps,lumps);
+  }
 
   document.getElementById('lump-input').value='';
   document.getElementById('note-input').value='';
@@ -765,8 +806,9 @@ function addLump(){
   document.querySelector('.toast-unit').textContent=' '+t.unit;
   const newMo=findMonths();
   const newAge=Math.floor(getAge()+newMo/12);
+  const targetStr=stockSymbol?`→ 買入 ${additionalShares} 股${stock.name||stockSymbol}`:'';
   document.getElementById('toast-sub').textContent=
-    `新增 ${fmt(amt)} 元 → 退休年齡更新為 ${newAge} 歲`;
+    `新增 ${fmt(amt)} 元 ${targetStr} → 退休年齡更新為 ${newAge} 歲`;
   showToast();
 
   render();
