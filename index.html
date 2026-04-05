@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <style>
 :root{
   --bg:#07090F;--s1:#0D1018;--s2:#121520;
@@ -22,6 +24,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--fu);font-weight:30
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 5%,rgba(201,150,58,.045) 0%,transparent 55%),radial-gradient(ellipse 60% 80% at 80% 95%,rgba(58,175,122,.03) 0%,transparent 55%);pointer-events:none;z-index:0}
 
 .page{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:0 1.5rem 5rem}
+
+.sync-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:11px;color:var(--ts);margin-left:auto}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.sync-dot.syncing{animation:pulse 1s infinite}
+.sync-dot.offline{background:var(--ts)}
+.sync-dot.error{background:#E24B4A}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 .toast{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-110%);background:var(--s1);border:1px solid var(--gb);border-radius:16px;padding:1.25rem 1.75rem;min-width:300px;max-width:420px;text-align:center;z-index:100;transition:transform .4s cubic-bezier(.175,.885,.32,1.275),opacity .4s;opacity:0}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
@@ -93,11 +102,11 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .asset-field input::placeholder{color:var(--tm)}
 .asset-unit{font-size:12px;color:var(--ts);text-align:right;margin-top:.25rem}
 .asset-row{display:flex;gap:.75rem;align-items:stretch}
-.btn-refresh{background:transparent;border:1px solid var(--br);color:var(--ts);border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-family:var(--fu);cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-refresh{background:transparent;border:1px solid var(--br);color:var(--ts);border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-family:var(--fu);cursor:pointer;transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center}
 .btn-refresh:hover{background:var(--gd);color:var(--gl);border-color:var(--gb)}
 .btn-refresh.loading{opacity:.6;pointer-events:none}
 .btn-refresh .spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--ts);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin-right:.5rem;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 .stock-card{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:1rem;margin-bottom:.75rem}
 .stock-card:last-child{margin-bottom:0}
@@ -235,10 +244,16 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
   <div class="asset-section">
     <div class="asset-title">
       <span>💰 我的資產</span>
-      <button class="btn-refresh" id="btn-refresh" onclick="fetchAllPrices()">
-        <span class="spinner" style="display:none"></span>
-        自動更新股價
-      </button>
+      <div style="display:flex;align-items:center;gap:1rem">
+        <div class="sync-badge">
+          <span class="sync-dot" id="sync-dot"></span>
+          <span id="sync-status">連線中...</span>
+        </div>
+        <button class="btn-refresh" id="btn-refresh" onclick="fetchAllPrices()">
+          <span class="spinner" style="display:none"></span>
+          自動更新股價
+        </button>
+      </div>
     </div>
     
     <div class="asset-grid">
@@ -388,6 +403,41 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 </div>
 
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDFC3a8qCtvi91wXPX2⁠8xWwwmkTZQtwKU0",
+  authDomain: "tinaretirement-18e44.firebaseapp.com",
+  projectId: "tinaretirement-18e44",
+  storageBucket: "tinaretirement-18e44.firebasestorage.app",
+  messagingSenderId: "2⁠71222942666",
+  appId: "1:271222942666:web:a664e02e31841a23453d33"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const userRef = db.ref('userData');
+
+let syncStatus = 'connecting';
+
+function updateSyncStatus(status, text){
+  syncStatus = status;
+  const dot = document.getElementById('sync-dot');
+  const statusEl = document.getElementById('sync-status');
+  dot.className = 'sync-dot';
+  if(status === 'online'){
+    dot.classList.add('');
+    statusEl.textContent = '已同步';
+  } else if(status === 'syncing'){
+    dot.classList.add('syncing');
+    statusEl.textContent = '同步中...';
+  } else if(status === 'offline'){
+    dot.classList.add('offline');
+    statusEl.textContent = '離線';
+  } else {
+    dot.classList.add('error');
+    statusEl.textContent = '同步失敗';
+  }
+}
+
 const SHARES50=24778, SHARES52=11000;
 const M50=26000, M52=9000, ML=5000;
 const R50=8, R52=9, RL=3;
@@ -405,8 +455,30 @@ const K={
   lumps:'lumps'
 };
 
-function load(k,def){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):def;}catch{return def;}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+let localData = {};
+let cloudData = {};
+let dataLoaded = false;
+let saveTimeout = null;
+
+function load(k,def){
+  if(cloudData.hasOwnProperty(k)) return cloudData[k];
+  if(localData.hasOwnProperty(k)) return localData[k];
+  return def;
+}
+
+function save(k,v){
+  cloudData[k] = v;
+  localData[k] = v;
+  if(saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    updateSyncStatus('syncing');
+    userRef.update(cloudData).then(() => {
+      updateSyncStatus('online');
+    }).catch(() => {
+      updateSyncStatus('offline');
+    });
+  }, 500);
+}
 
 function getP50(){return parseFloat(load(K.p50,DEFAULT_P50))||DEFAULT_P50;}
 function getP52(){return parseFloat(load(K.p52,DEFAULT_P52))||DEFAULT_P52;}
@@ -421,19 +493,25 @@ function getShares(sym){return parseInt(load(sym==='0050'?K.s50:K.s52,0))||0;}
 function getCost(sym){return parseFloat(load(sym==='0050'?K.c50:K.c52,0))||0;}
 
 function saveAssets(){
-  save(K.cash,parseFloat(document.getElementById('cash-input').value)||0);
-  save(K.other,parseFloat(document.getElementById('other-input').value)||0);
-  save(K.s50,parseInt(document.getElementById('shares-0050').value)||0);
-  save(K.s52,parseInt(document.getElementById('shares-0052').value)||0);
-  save(K.c50,parseFloat(document.getElementById('cost-0050').value)||0);
-  save(K.c52,parseFloat(document.getElementById('cost-0052').value)||0);
+  const cash = parseFloat(document.getElementById('cash-input').value)||0;
+  const other = parseFloat(document.getElementById('other-input').value)||0;
+  const s50 = parseInt(document.getElementById('shares-0050').value)||0;
+  const s52 = parseInt(document.getElementById('shares-0052').value)||0;
+  const c50 = parseFloat(document.getElementById('cost-0050').value)||0;
+  const c52 = parseFloat(document.getElementById('cost-0052').value)||0;
+  save(K.cash, cash);
+  save(K.other, other);
+  save(K.s50, s50);
+  save(K.s52, s52);
+  save(K.c50, c50);
+  save(K.c52, c52);
   render();
 }
 
 function saveParams(){
-  save(K.r50,parseFloat(document.getElementById('r50-input').value)||R50);
-  save(K.r52,parseFloat(document.getElementById('r52-input').value)||R52);
-  save(K.age,parseInt(document.getElementById('age-input').value)||START_AGE);
+  save(K.r50, parseFloat(document.getElementById('r50-input').value)||R50);
+  save(K.r52, parseFloat(document.getElementById('r52-input').value)||R52);
+  save(K.age, parseInt(document.getElementById('age-input').value)||START_AGE);
   render();
 }
 
@@ -517,6 +595,8 @@ function updateChart(){
 }
 
 function render(){
+  if(!dataLoaded) return;
+
   const age=getAge();
   const mo=findMonths();
   const ageExact=age+mo/12;
@@ -665,7 +745,6 @@ async function fetchAllPrices(){
   const spinner=btn.querySelector('.spinner');
   btn.classList.add('loading');
   spinner.style.display='inline-block';
-  btn.childNodes[1].textContent='更新中...';
 
   const [result50,result52]=await Promise.all([
     fetchStockPrice('0050'),
@@ -684,19 +763,26 @@ async function fetchAllPrices(){
 
   spinner.style.display='none';
   btn.classList.remove('loading');
-  btn.childNodes[1].textContent='';
-  btn.innerHTML='<span class="spinner" style="display:none"></span>自動更新股價';
 
   if(result50.success&&result52.success){
     btn.textContent='✓ 已更新';
     btn.style.color='var(--green)';
-    setTimeout(()=>{btn.innerHTML='<span class="spinner" style="display:none"></span>自動更新股價';btn.style.color='';},2000);
+    setTimeout(()=>{btn.textContent='自動更新股價';btn.style.color='';},2000);
   }
 
   render();
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
+function loadAllData(){
+  for(const k in K){
+    try{
+      const v=localStorage.getItem(k);
+      if(v!==null) localData[k]=JSON.parse(v);
+    }catch{}
+  }
+}
+
+function initUI(){
   document.getElementById('cash-input').value=getCash()||'';
   document.getElementById('other-input').value=getOther()||'';
   document.getElementById('shares-0050').value=getShares('0050')||'';
@@ -730,8 +816,34 @@ document.addEventListener('DOMContentLoaded',()=>{
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')addLump();});
 
   initChart();
+  dataLoaded = true;
   render();
+}
+
+userRef.on('value', (snapshot) => {
+  const data = snapshot.val();
+  if(data){
+    cloudData = data;
+    if(dataLoaded){
+      render();
+    }
+  }
+  updateSyncStatus('online');
+}, (error) => {
+  console.error('Firebase error:', error);
+  updateSyncStatus('error', '同步失敗');
 });
+
+userRef.on('disconnect', () => {
+  updateSyncStatus('offline');
+});
+
+userRef.on('connect', () => {
+  updateSyncStatus('online');
+});
+
+loadAllData();
+initUI();
 </script>
 </body>
 </html>
