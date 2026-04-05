@@ -21,10 +21,8 @@ html{font-size:16px;scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--fu);font-weight:300;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 5%,rgba(201,150,58,.045) 0%,transparent 55%),radial-gradient(ellipse 60% 80% at 80% 95%,rgba(58,175,122,.03) 0%,transparent 55%);pointer-events:none;z-index:0}
 
-/* Layout */
 .page{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:0 1.5rem 5rem}
 
-/* Toast */
 .toast{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-110%);background:var(--s1);border:1px solid var(--gb);border-radius:16px;padding:1.25rem 1.75rem;min-width:300px;max-width:420px;text-align:center;z-index:100;transition:transform .4s cubic-bezier(.175,.885,.32,1.275),opacity .4s;opacity:0}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast-top{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:500;margin-bottom:.5rem}
@@ -32,14 +30,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .toast-unit{font-size:1rem;color:var(--ts);font-family:var(--fu)}
 .toast-sub{font-size:13px;color:var(--ts);margin-top:.4rem}
 
-/* Header */
 header{padding:2.75rem 0 2rem}
 .eyebrow{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:.875rem}
 h1{font-family:var(--fd);font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:300;line-height:1.2;margin-bottom:.5rem}
 h1 em{font-style:italic;color:var(--gl)}
 .header-sub{font-size:13px;color:var(--ts);font-weight:300}
 
-/* ── Hero ── */
 .hero{background:var(--s1);border:1px solid var(--br);border-radius:22px;padding:2.25rem;margin-bottom:1.25rem;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(201,150,58,.07) 0%,transparent 70%);pointer-events:none}
 .hero-grid{display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:center}
@@ -50,7 +46,6 @@ h1 em{font-style:italic;color:var(--gl)}
 .hero-line{font-size:13.5px;color:var(--ts);font-weight:300}
 .hero-line strong{color:var(--text);font-weight:400}
 
-/* Ring */
 .ring-wrap{width:130px;height:130px;flex-shrink:0}
 svg.ring-svg{transform:rotate(-90deg)}
 .ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:8}
@@ -59,7 +54,6 @@ svg.ring-svg{transform:rotate(-90deg)}
 .ring-pct{font-family:var(--fd);font-size:1.5rem;font-weight:300;color:var(--gl)}
 .ring-lbl{font-size:10px;color:var(--ts);letter-spacing:.06em}
 
-/* Mini cards */
 .mini-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--br);border-radius:14px;overflow:hidden;margin-bottom:1.25rem}
 .mini-c{background:var(--s1);padding:1.1rem 1.25rem}
 .mini-l{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ts);font-weight:500;margin-bottom:.4rem}
@@ -67,7 +61,6 @@ svg.ring-svg{transform:rotate(-90deg)}
 .mini-v.gold{color:var(--gl)}
 .mini-s{font-size:11px;color:var(--ts);margin-top:.2rem}
 
-/* ── Input section ── */
 .input-card{background:var(--s1);border:1px solid var(--br);border-radius:22px;padding:1.75rem 2rem;margin-bottom:1.25rem}
 .input-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ts);font-weight:500;margin-bottom:1.25rem}
 .input-row{display:flex;gap:.75rem;align-items:stretch}
@@ -77,37 +70,69 @@ input[type=number]{width:100%;background:var(--bg);border:1px solid var(--br);bo
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 input[type=number]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,150,58,.12)}
 input[type=number]::placeholder{color:var(--tm)}
+input[type=text],input[type=search]{width:100%;background:var(--bg);border:1px solid var(--br);border-radius:10px;padding:.65rem 1rem;font-size:13px;font-family:var(--fu);font-weight:300;color:var(--text);outline:none;transition:border-color .2s}
+input[type=text]:focus,input[type=search]:focus{border-color:rgba(201,150,58,.4)}
+input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .input-unit{position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:13px;color:var(--ts)}
 .note-wrap{margin-top:.75rem}
-input[type=text]{width:100%;background:var(--bg);border:1px solid var(--br);border-radius:10px;padding:.65rem 1rem;font-size:13px;font-family:var(--fu);font-weight:300;color:var(--text);outline:none;transition:border-color .2s}
-input[type=text]:focus{border-color:rgba(201,150,58,.4)}
-input[type=text]::placeholder{color:var(--tm)}
 .btn-add{background:var(--gold);color:#07090F;border:none;border-radius:12px;padding:.85rem 1.5rem;font-size:14px;font-family:var(--fu);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .2s,transform .1s}
 .btn-add:hover{background:var(--gl)}
 .btn-add:active{transform:scale(.97)}
 
-/* Preview strip */
 .preview{display:flex;gap:.75rem;margin-top:1.1rem;padding-top:1.1rem;border-top:1px solid var(--br);display:none}
 .prev-item{flex:1;text-align:center}
 .prev-label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ts);margin-bottom:.3rem}
 .prev-val{font-family:var(--fd);font-size:1.2rem;color:var(--gl)}
 
-/* ── Stock prices ── */
+.asset-section{background:var(--s1);border:1px solid var(--br);border-radius:22px;padding:1.75rem 2rem;margin-bottom:1.25rem}
+.asset-title{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ts);font-weight:500;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center}
+.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.asset-field{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:1rem}
+.asset-field label{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ts);margin-bottom:.5rem}
+.asset-field input{width:100%;background:transparent;border:none;font-size:1.1rem;font-family:var(--fd);font-weight:400;color:var(--gl);outline:none;padding:.25rem 0}
+.asset-field input::placeholder{color:var(--tm)}
+.asset-unit{font-size:12px;color:var(--ts);text-align:right;margin-top:.25rem}
+.asset-row{display:flex;gap:.75rem;align-items:stretch}
+.btn-refresh{background:transparent;border:1px solid var(--br);color:var(--ts);border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-family:var(--fu);cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-refresh:hover{background:var(--gd);color:var(--gl);border-color:var(--gb)}
+.btn-refresh.loading{opacity:.6;pointer-events:none}
+.btn-refresh .spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--ts);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin-right:.5rem;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}
+
+.stock-card{background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:1rem;margin-bottom:.75rem}
+.stock-card:last-child{margin-bottom:0}
+.stock-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.stock-name{font-size:13px;font-weight:500;color:var(--text)}
+.stock-symbol{font-size:11px;color:var(--ts);margin-left:.5rem}
+.stock-price{font-family:var(--fd);font-size:1.4rem;color:var(--gl)}
+.stock-change{font-size:12px;margin-left:.5rem}
+.stock-change.up{color:var(--green)}
+.stock-change.down{color:#E24B4A}
+.stock-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--br)}
+.stock-field label{display:block;font-size:10px;color:var(--ts);margin-bottom:.25rem;letter-spacing:.06em}
+.stock-field input{width:100%;background:var(--s1);border:1px solid var(--br);border-radius:8px;padding:.5rem;font-size:13px;font-family:var(--fu);color:var(--text);outline:none}
+.stock-field input:focus{border-color:var(--gb)}
+.stock-field .field-value{font-size:13px;color:var(--ts);padding:.5rem 0}
+.stock-total{text-align:right;margin-top:.5rem;font-size:13px;color:var(--ts)}
+.stock-total strong{color:var(--gl);font-weight:400}
+
+.total-card{background:linear-gradient(135deg,rgba(201,150,58,.08),rgba(201,150,58,.04));border:1px solid var(--gb);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0}
+.total-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.05)}
+.total-label{font-size:12px;color:var(--ts)}
+.total-value{font-family:var(--fd);font-size:1.2rem;color:var(--text)}
+.total-value.gold{color:var(--gl);font-size:1.5rem}
+.total-grand{font-size:14px;color:var(--ts);margin-top:1rem;padding-top:1rem;border-top:1px solid var(--br);display:flex;justify-content:space-between;align-items:center}
+.total-grand .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ts)}
+.total-grand .value{font-family:var(--fd);font-size:2rem;color:var(--gl)}
+
 .price-card{background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
 .price-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
 .price-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ts);font-weight:500}
 .price-updated{font-size:11.5px;color:var(--ts)}
 .price-updated span{color:var(--gold)}
-.price-row{display:flex;gap:.75rem;align-items:center}
-.price-field{flex:1;position:relative}
-.price-field label{display:block;font-size:11px;color:var(--ts);margin-bottom:.35rem;letter-spacing:.06em}
-.price-field input{width:100%;background:var(--bg);border:1px solid var(--br);border-radius:10px;padding:.6rem .875rem;font-size:1rem;font-family:var(--fd);font-weight:300;color:var(--text);outline:none;transition:border-color .2s}
-.price-field input:focus{border-color:rgba(201,150,58,.4)}
-.btn-price{background:transparent;border:1px solid var(--br);color:var(--ts);border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-family:var(--fu);cursor:pointer;transition:background .2s,color .2s,border-color .2s;align-self:flex-end;white-space:nowrap}
-.btn-price:hover{background:var(--gd);color:var(--gl);border-color:var(--gb)}
 .stale-warn{background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.2);border-radius:8px;padding:.6rem 1rem;font-size:12px;color:var(--gold);margin-top:.75rem;display:none}
 
-/* ── History ── */
 .history-card{background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
 .hist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
 .hist-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ts);font-weight:500}
@@ -126,11 +151,9 @@ input[type=text]::placeholder{color:var(--tm)}
 .hist-del{background:none;border:none;color:var(--tm);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:6px;transition:color .2s,background .2s;flex-shrink:0}
 .hist-del:hover{color:#E24B4A;background:rgba(226,75,74,.1)}
 
-/* Chart */
 .chart-card{background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
 .chart-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ts);font-weight:500;margin-bottom:1.25rem}
 
-/* utils */
 .flex-sb{display:flex;justify-content:space-between;align-items:center}
 .btn-sm{background:transparent;border:1px solid var(--br);color:var(--ts);border-radius:8px;padding:.35rem .75rem;font-size:12px;font-family:var(--fu);cursor:pointer;transition:all .2s}
 .btn-sm:hover{border-color:rgba(226,75,74,.4);color:#E24B4A}
@@ -141,28 +164,26 @@ input[type=text]::placeholder{color:var(--tm)}
   .hero-grid{grid-template-columns:1fr}
   .ring-wrap{display:none}
   .input-row{flex-direction:column}
-  .price-row{flex-wrap:wrap}
+  .asset-grid{grid-template-columns:1fr}
+  .stock-fields{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- Toast -->
   <div class="toast" id="toast">
     <div class="toast-top">✓ 成功加入</div>
     <div class="toast-days"><span id="toast-days">—</span><span class="toast-unit"> 天</span></div>
     <div class="toast-sub" id="toast-sub">—</div>
   </div>
 
-  <!-- Header -->
   <header>
     <p class="eyebrow">2,000 萬退休計畫</p>
-    <h1>距離財務自由，<br>還有 <em id="hdr-years">—</em> 年</h1>
-    <p class="header-sub">持有 0050 × 24,778 股 ＋ 0052 × 11,000 股，每月定期定額持續投入</p>
+    <h1>距離財務自由，<br>有 <em id="hdr-years">—</em> 年</h1>
+    <p class="header-sub" id="hdr-sub">設定你的資產，快速預估退休時間</p>
   </header>
 
-  <!-- Hero -->
   <div class="hero">
     <div class="hero-grid">
       <div>
@@ -193,12 +214,11 @@ input[type=text]::placeholder{color:var(--tm)}
     </div>
   </div>
 
-  <!-- Mini stats -->
   <div class="mini-cards">
     <div class="mini-c">
-      <div class="mini-l">目前持股市值</div>
-      <div class="mini-v gold" id="mc-port">—</div>
-      <div class="mini-s">0050 ＋ 0052</div>
+      <div class="mini-l">總資產</div>
+      <div class="mini-v gold" id="mc-total">—</div>
+      <div class="mini-s">股票＋現金</div>
     </div>
     <div class="mini-c">
       <div class="mini-l">單筆累積加碼</div>
@@ -212,9 +232,94 @@ input[type=text]::placeholder{color:var(--tm)}
     </div>
   </div>
 
-  <!-- Input -->
+  <div class="asset-section">
+    <div class="asset-title">
+      <span>💰 我的資產</span>
+      <button class="btn-refresh" id="btn-refresh" onclick="fetchAllPrices()">
+        <span class="spinner" style="display:none"></span>
+        自動更新股價
+      </button>
+    </div>
+    
+    <div class="asset-grid">
+      <div class="asset-field">
+        <label>現金存款</label>
+        <input type="number" id="cash-input" placeholder="0" min="0" oninput="saveAssets()">
+        <div class="asset-unit">元</div>
+      </div>
+      <div class="asset-field">
+        <label>其他資產</label>
+        <input type="number" id="other-input" placeholder="0" min="0" oninput="saveAssets()">
+        <div class="asset-unit">元</div>
+      </div>
+    </div>
+
+    <div id="stock-list">
+      <div class="stock-card" data-symbol="0050">
+        <div class="stock-header">
+          <div><span class="stock-name">元大台灣50</span><span class="stock-symbol">0050</span></div>
+          <div class="stock-price" id="price-0050">--</div>
+        </div>
+        <div class="stock-fields">
+          <div class="stock-field">
+            <label>持股數量</label>
+            <input type="number" id="shares-0050" placeholder="0" min="0" oninput="saveAssets()">
+          </div>
+          <div class="stock-field">
+            <label>成本均價</label>
+            <input type="number" id="cost-0050" placeholder="0" step="0.01" oninput="saveAssets()">
+          </div>
+          <div class="stock-field">
+            <label>市值</label>
+            <div class="field-value" id="value-0050">0 元</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stock-card" data-symbol="0052">
+        <div class="stock-header">
+          <div><span class="stock-name">富邦科技</span><span class="stock-symbol">0052</span></div>
+          <div class="stock-price" id="price-0052">--</div>
+        </div>
+        <div class="stock-fields">
+          <div class="stock-field">
+            <label>持股數量</label>
+            <input type="number" id="shares-0052" placeholder="0" min="0" oninput="saveAssets()">
+          </div>
+          <div class="stock-field">
+            <label>成本均價</label>
+            <input type="number" id="cost-0052" placeholder="0" step="0.01" oninput="saveAssets()">
+          </div>
+          <div class="stock-field">
+            <label>市值</label>
+            <div class="field-value" id="value-0052">0 元</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="total-card" style="margin-top:1rem">
+      <div class="total-row">
+        <span class="total-label">💵 現金存款</span>
+        <span class="total-value" id="total-cash">0 元</span>
+      </div>
+      <div class="total-row">
+        <span class="total-label">📈 股票市值</span>
+        <span class="total-value" id="total-stocks">0 元</span>
+      </div>
+      <div class="total-row">
+        <span class="total-label">🏦 其他資產</span>
+        <span class="total-value" id="total-other">0 元</span>
+      </div>
+      <div class="total-grand">
+        <span class="label">總資產</span>
+        <span class="value" id="grand-total">0 元</span>
+      </div>
+    </div>
+  </div>
+
   <div class="input-card">
-    <div class="input-title">今天多存一筆進 0050</div>
+    <div class="input-title">今天多存一筆錢</div>
     <div class="input-row">
       <div class="input-wrap">
         <input type="number" id="lump-input" placeholder="輸入金額，例如 10000" min="1" step="1000">
@@ -241,27 +346,28 @@ input[type=text]::placeholder{color:var(--tm)}
     </div>
   </div>
 
-  <!-- Stock prices -->
   <div class="price-card">
     <div class="price-header">
-      <div class="price-title">股票現值</div>
-      <div class="price-updated">上次更新：<span id="price-date">—</span></div>
+      <div class="price-title">系統參數</div>
+      <div class="price-updated">每月投入：<span>39,000 元</span></div>
     </div>
-    <div class="price-row">
+    <div class="price-row" style="flex-wrap:wrap;gap:.75rem">
       <div class="price-field">
-        <label>0050 元大台灣50</label>
-        <input type="number" id="p50-input" placeholder="73.95" step="0.01">
+        <label>0050 年化報酬率</label>
+        <input type="number" id="r50-input" value="8" step="0.1" oninput="saveParams()">
       </div>
       <div class="price-field">
-        <label>0052 富邦科技</label>
-        <input type="number" id="p52-input" placeholder="43.82" step="0.01">
+        <label>0052 年化報酬率</label>
+        <input type="number" id="r52-input" value="9" step="0.1" oninput="saveParams()">
       </div>
-      <button class="btn-price" onclick="updatePrices()">更新價格</button>
+      <div class="price-field">
+        <label>年齡</label>
+        <input type="number" id="age-input" value="31" min="18" max="80" oninput="saveParams()">
+      </div>
     </div>
-    <div class="stale-warn" id="stale-warn">⚠ 距上次更新已超過 7 天，建議更新最新股價</div>
+    <div class="stale-warn" id="stale-warn">⚠ 股價已超過 7 天未更新，請點擊「自動更新股價」</div>
   </div>
 
-  <!-- History -->
   <div class="history-card">
     <div class="hist-header">
       <div class="hist-title">加碼紀錄</div>
@@ -274,16 +380,14 @@ input[type=text]::placeholder{color:var(--tm)}
     </div>
   </div>
 
-  <!-- Chart -->
   <div class="chart-card">
     <div class="chart-title">資產成長路徑</div>
     <div style="position:relative;height:240px"><canvas id="gc"></canvas></div>
   </div>
 
-</div><!-- /page -->
+</div>
 
 <script>
-/* ── Constants ── */
 const SHARES50=24778, SHARES52=11000;
 const M50=26000, M52=9000, ML=5000;
 const R50=8, R52=9, RL=3;
@@ -292,8 +396,14 @@ const START_AGE=31, START_YR=2026;
 const DEFAULT_P50=73.95, DEFAULT_P52=43.82;
 const CIRC=2*Math.PI*56;
 
-/* ── Storage keys ── */
-const K={p50:'p50',p52:'p52',pdate:'pdate',lumps:'lumps'};
+const K={
+  cash:'asset_cash',other:'asset_other',
+  s50:'asset_s50',s52:'asset_s52',
+  c50:'asset_c50',c52:'asset_c52',
+  r50:'param_r50',r52:'param_r52',age:'param_age',
+  p50:'price_50',p52:'price_52',pdate:'price_date',
+  lumps:'lumps'
+};
 
 function load(k,def){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):def;}catch{return def;}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
@@ -302,18 +412,44 @@ function getP50(){return parseFloat(load(K.p50,DEFAULT_P50))||DEFAULT_P50;}
 function getP52(){return parseFloat(load(K.p52,DEFAULT_P52))||DEFAULT_P52;}
 function getLumps(){return load(K.lumps,[])||[];}
 function getTotalLump(){return getLumps().reduce((s,i)=>s+i.amount,0);}
+function getR50(){return parseFloat(load(K.r50,R50))||R50;}
+function getR52(){return parseFloat(load(K.r52,R52))||R52;}
+function getAge(){return parseInt(load(K.age,START_AGE))||START_AGE;}
+function getCash(){return parseFloat(load(K.cash,0))||0;}
+function getOther(){return parseFloat(load(K.other,0))||0;}
+function getShares(sym){return parseInt(load(sym==='0050'?K.s50:K.s52,0))||0;}
+function getCost(sym){return parseFloat(load(sym==='0050'?K.c50:K.c52,0))||0;}
 
-/* ── Math ── */
+function saveAssets(){
+  save(K.cash,parseFloat(document.getElementById('cash-input').value)||0);
+  save(K.other,parseFloat(document.getElementById('other-input').value)||0);
+  save(K.s50,parseInt(document.getElementById('shares-0050').value)||0);
+  save(K.s52,parseInt(document.getElementById('shares-0052').value)||0);
+  save(K.c50,parseFloat(document.getElementById('cost-0050').value)||0);
+  save(K.c52,parseFloat(document.getElementById('cost-0052').value)||0);
+  render();
+}
+
+function saveParams(){
+  save(K.r50,parseFloat(document.getElementById('r50-input').value)||R50);
+  save(K.r52,parseFloat(document.getElementById('r52-input').value)||R52);
+  save(K.age,parseInt(document.getElementById('age-input').value)||START_AGE);
+  render();
+}
+
 function fv(pmt,r,mo){const m=r/12/100;return m?pmt*((Math.pow(1+m,mo)-1)/m):pmt*mo;}
 function grow(p,r,yr){return p*Math.pow(1+r/100,yr);}
 
 function calcTotal(months,extraLump=0){
   const yr=months/12;
-  const v50=SHARES50*getP50();
-  const v52=SHARES52*getP52();
+  const cash=getCash(),other=getOther();
+  const shares50=getShares('0050'),shares52=getShares('0052');
+  const p50=getP50(),p52=getP52();
+  const r50=getR50(),r52=getR52();
   const lump=getTotalLump()+extraLump;
-  return grow(v50,R50,yr)+grow(v52,R52,yr)+(lump?grow(lump,R50,yr):0)
-        +fv(M50,R50,months)+fv(M52,R52,months)+fv(ML,RL,months);
+  const stocks=grow(shares50*p50,r50,yr)+grow(shares52*p52,r52,yr);
+  const base=grow(cash+other,r50,yr);
+  return stocks+base+(lump?grow(lump,r50,yr):0)+fv(M50,r50,months)+fv(M52,r52,months)+fv(ML,RL,months);
 }
 
 function findMonths(extraLump=0){
@@ -322,10 +458,15 @@ function findMonths(extraLump=0){
 }
 
 function currentValue(){
-  return SHARES50*getP50()+SHARES52*getP52()+getTotalLump();
+  const shares50=getShares('0050'),shares52=getShares('0052');
+  return shares50*getP50()+shares52*getP52()+getCash()+getOther()+getTotalLump();
 }
 
-/* ── Formatting ── */
+function stockValue(sym){
+  const shares=getShares(sym),price=sym==='0050'?getP50():getP52();
+  return shares*price;
+}
+
 function fmt(n){return Math.round(n).toLocaleString('zh-TW');}
 function fmtM(n){return (n/10000).toFixed(1)+'萬';}
 function fmtM0(n){return Math.round(n/10000)+'萬';}
@@ -343,7 +484,6 @@ function daysSince(iso){
   try{return Math.floor((Date.now()-new Date(iso))/86400000);}catch{return 999;}
 }
 
-/* ── Chart ── */
 Chart.defaults.color='#7A7468';
 Chart.defaults.font.family="'Outfit',sans-serif";
 Chart.defaults.font.size=11;
@@ -363,9 +503,10 @@ function initChart(){
 }
 
 function updateChart(){
+  const age=getAge();
   const labels=[],data=[],target=[];
   for(let y=0;y<=22;y++){
-    labels.push((START_AGE+y)+'歲');
+    labels.push((age+y)+'歲');
     data.push(Math.round(calcTotal(y*12)));
     target.push(TARGET);
   }
@@ -375,19 +516,17 @@ function updateChart(){
   chart.update('none');
 }
 
-/* ── Main render ── */
 function render(){
+  const age=getAge();
   const mo=findMonths();
-  const ageExact=START_AGE+mo/12;
+  const ageExact=age+mo/12;
   const ageFloor=Math.floor(ageExact);
-  const yr=START_YR+(ageFloor-START_AGE);
-  const yearsLeft=ageFloor-START_AGE;
+  const yr=START_YR+(ageFloor-age);
+  const yearsLeft=Math.max(0,ageFloor-age);
   const moLeft=Math.round(mo);
 
-  // Header
   document.getElementById('hdr-years').textContent=yearsLeft;
 
-  // Hero
   document.getElementById('hero-age-num').textContent=ageFloor;
   document.getElementById('hero-yr').textContent=yr;
   const moRemain=moLeft%12;
@@ -395,30 +534,35 @@ function render(){
     `${Math.floor(moLeft/12)} 年${moRemain?` ${moRemain} 個月`:''}`;
   document.getElementById('hero-now').textContent=fmtM(currentValue());
 
-  // Ring
   const pct=Math.min(currentValue()/TARGET,1);
   const offset=CIRC*(1-pct);
   document.getElementById('ring').style.strokeDashoffset=offset;
   document.getElementById('ring-pct').textContent=Math.round(pct*100)+'%';
 
-  // Mini cards
-  const portVal=SHARES50*getP50()+SHARES52*getP52();
-  document.getElementById('mc-port').textContent=fmtM(portVal);
+  const cash=getCash(),other=getOther(),shares50=getShares('0050'),shares52=getShares('0052');
+  const totalStocks=stockValue('0050')+stockValue('0052');
+  const grandTotal=cash+other+totalStocks;
+
+  document.getElementById('mc-total').textContent=fmtM(grandTotal);
   const lumps=getLumps();
   const totalL=getTotalLump();
   document.getElementById('mc-lump').textContent=totalL?fmt(totalL)+'元':'0 元';
-  document.getElementById('mc-lump-count').textContent=
-    lumps.length?`共 ${lumps.length} 筆`:'尚未加碼';
-  const gap=Math.max(TARGET-currentValue(),0);
-  document.getElementById('mc-gap').textContent=fmtM(gap);
+  document.getElementById('mc-lump-count').textContent=lumps.length?`共 ${lumps.length} 筆`:'尚未加碼';
+  document.getElementById('mc-gap').textContent=fmtM(Math.max(TARGET-grandTotal,0));
 
-  // Price date
+  document.getElementById('total-cash').textContent=fmt(cash)+' 元';
+  document.getElementById('total-stocks').textContent=fmt(totalStocks)+' 元';
+  document.getElementById('total-other').textContent=fmt(other)+' 元';
+  document.getElementById('grand-total').textContent=fmt(grandTotal)+' 元';
+
+  document.getElementById('value-0050').textContent=fmt(stockValue('0050'))+' 元';
+  document.getElementById('value-0052').textContent=fmt(stockValue('0052'))+' 元';
+
   const pdate=load(K.pdate,'');
   document.getElementById('price-date').textContent=pdate?new Date(pdate).toLocaleDateString('zh-TW'):'未設定';
   const stale=pdate&&daysSince(pdate)>7;
   document.getElementById('stale-warn').style.display=stale?'block':'none';
 
-  // History
   renderHistory();
   updateChart();
 }
@@ -454,7 +598,6 @@ function renderHistory(){
   });
 }
 
-/* ── Actions ── */
 function addLump(){
   const amt=parseInt(document.getElementById('lump-input').value)||0;
   if(amt<=0){
@@ -465,27 +608,23 @@ function addLump(){
   }
   const note=document.getElementById('note-input').value.trim();
 
-  // Calculate days saved
   const moBefore=findMonths(0);
   const moAfter=findMonths(amt);
   const daysSaved=Math.round((moBefore-moAfter)/12*365);
 
-  // Save
   const lumps=getLumps();
   lumps.push({amount:amt,note,date:new Date().toISOString().slice(0,10),daysSaved});
   save(K.lumps,lumps);
 
-  // Clear inputs
   document.getElementById('lump-input').value='';
   document.getElementById('note-input').value='';
   document.getElementById('preview').style.display='none';
 
-  // Toast
   const t=fmtDays(daysSaved);
   document.getElementById('toast-days').textContent=t.val;
   document.querySelector('.toast-unit').textContent=' '+t.unit;
   const newMo=findMonths();
-  const newAge=Math.floor(START_AGE+newMo/12);
+  const newAge=Math.floor(getAge()+newMo/12);
   document.getElementById('toast-sub').textContent=
     `新增 ${fmt(amt)} 元 → 退休年齡更新為 ${newAge} 歲`;
   showToast();
@@ -507,26 +646,71 @@ function showToast(){
   showToast._t=setTimeout(()=>t.classList.remove('show'),3200);
 }
 
-function updatePrices(){
-  const p50=parseFloat(document.getElementById('p50-input').value);
-  const p52=parseFloat(document.getElementById('p52-input').value);
-  if(p50>0)save(K.p50,p50);
-  if(p52>0)save(K.p52,p52);
-  if(p50>0||p52>0){
-    save(K.pdate,new Date().toISOString().slice(0,10));
-    document.getElementById('p50-input').value='';
-    document.getElementById('p52-input').value='';
-    render();
-    // Brief flash
-    const btn=document.querySelector('.btn-price');
-    btn.textContent='✓ 已更新';
-    btn.style.color='var(--green)';
-    setTimeout(()=>{btn.textContent='更新價格';btn.style.color='';},2000);
+async function fetchStockPrice(symbol){
+  try{
+    const response=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}.TW?interval=1d&range=1d`);
+    const data=await response.json();
+    const result=data.chart.result[0];
+    const price=result.meta.regularMarketPrice;
+    const change=result.meta.regularMarketChangePercent;
+    return {price,change,success:true};
+  }catch(e){
+    console.warn(`Failed to fetch ${symbol}:`,e);
+    return {price:null,change:null,success:false};
   }
 }
 
-// Live preview while typing
+async function fetchAllPrices(){
+  const btn=document.getElementById('btn-refresh');
+  const spinner=btn.querySelector('.spinner');
+  btn.classList.add('loading');
+  spinner.style.display='inline-block';
+  btn.childNodes[1].textContent='更新中...';
+
+  const [result50,result52]=await Promise.all([
+    fetchStockPrice('0050'),
+    fetchStockPrice('0052')
+  ]);
+
+  if(result50.success)save(K.p50,result50.price);
+  if(result52.success)save(K.p52,result52.price);
+  
+  document.getElementById('price-0050').textContent=result50.success?result50.price.toFixed(2):'--';
+  document.getElementById('price-0052').textContent=result52.success?result52.price.toFixed(2):'--';
+
+  if(result50.success||result52.success){
+    save(K.pdate,new Date().toISOString().slice(0,10));
+  }
+
+  spinner.style.display='none';
+  btn.classList.remove('loading');
+  btn.childNodes[1].textContent='';
+  btn.innerHTML='<span class="spinner" style="display:none"></span>自動更新股價';
+
+  if(result50.success&&result52.success){
+    btn.textContent='✓ 已更新';
+    btn.style.color='var(--green)';
+    setTimeout(()=>{btn.innerHTML='<span class="spinner" style="display:none"></span>自動更新股價';btn.style.color='';},2000);
+  }
+
+  render();
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('cash-input').value=getCash()||'';
+  document.getElementById('other-input').value=getOther()||'';
+  document.getElementById('shares-0050').value=getShares('0050')||'';
+  document.getElementById('shares-0052').value=getShares('0052')||'';
+  document.getElementById('cost-0050').value=getCost('0050')||'';
+  document.getElementById('cost-0052').value=getCost('0052')||'';
+  document.getElementById('r50-input').value=getR50();
+  document.getElementById('r52-input').value=getR52();
+  document.getElementById('age-input').value=getAge();
+
+  const p50=getP50(),p52=getP52();
+  document.getElementById('price-0050').textContent=p50!==DEFAULT_P50?p50.toFixed(2):'--';
+  document.getElementById('price-0052').textContent=p52!==DEFAULT_P52?p52.toFixed(2):'--';
+
   const inp=document.getElementById('lump-input');
   inp.addEventListener('input',()=>{
     const amt=parseInt(inp.value)||0;
@@ -536,22 +720,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     const moBefore=findMonths(0);
     const moAfter=findMonths(amt);
     const daysSaved=Math.round((moBefore-moAfter)/12*365);
-    const fv50=grow(amt,R50,19);
-    const newAge=Math.floor(START_AGE+moAfter/12);
+    const fv50=grow(amt,getR50(),19);
+    const newAge=Math.floor(getAge()+moAfter/12);
     const t=fmtDays(daysSaved);
     document.getElementById('prev-days').textContent=t.val+' '+t.unit;
     document.getElementById('prev-fv').textContent=fmtM0(fv50);
     document.getElementById('prev-age').textContent=newAge+' 歲';
   });
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')addLump();});
-  document.getElementById('p50-input').addEventListener('keydown',e=>{if(e.key==='Enter')updatePrices();});
-  document.getElementById('p52-input').addEventListener('keydown',e=>{if(e.key==='Enter')updatePrices();});
-
-  // Load saved prices into fields as placeholder
-  const sp50=load(K.p50,null);
-  const sp52=load(K.p52,null);
-  if(sp50)document.getElementById('p50-input').placeholder=sp50;
-  if(sp52)document.getElementById('p52-input').placeholder=sp52;
 
   initChart();
   render();
