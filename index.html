@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
 <title>退休達標追蹤｜2,000 萬計畫</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -280,6 +282,7 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
           自動更新股價
         </button>
         <button class="btn-refresh" onclick="clearStocks()" style="color:#E24B4A;border-color:rgba(226,75,74,.3)">清除股票</button>
+        <button class="btn-refresh" onclick="showDebug()" style="color:#64748B">診斷</button>
       </div>
     </div>
     
@@ -444,38 +447,45 @@ const K={
   lumps:'lumps',age:'param_age',target:'param_target'
 };
 
-let localData = {};
-let cloudData = {};
+/* ══════════════════════════════════════════════════════
+   資料層：單一 appData 作為唯一資料來源
+   ══════════════════════════════════════════════════════ */
+let appData = {
+  asset_cash:0, asset_other:0, asset_stocks:[], lumps:[],
+  param_age:31, param_target:20000000, price_date:''
+};
 let dataLoaded = false;
 let saveTimeout = null;
 let stockPrices = {};
 let targetValue = 20000000;
 
-function load(k,def){
-  if(cloudData.hasOwnProperty(k)) return cloudData[k];
-  if(localData.hasOwnProperty(k)) return localData[k];
-  return def;
-}
-
-function save(k,v){
-  cloudData[k] = v;
-  localData[k] = v;
-  try{localStorage.setItem(k,JSON.stringify(v));}catch{}
-  if(saveTimeout) clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    updateSyncStatus('syncing');
-    userRef.update(cloudData).then(() => {
-      updateSyncStatus('online');
-    }).catch(() => {
-      updateSyncStatus('offline');
-    });
-  }, 500);
-}
-
-function localSave(){
-  Object.keys(cloudData).forEach(k=>{
-    try{localStorage.setItem(k,JSON.stringify(cloudData[k]));}catch{}
+/* 從 localStorage 讀入 appData */
+function loadFromStorage(){
+  Object.keys(appData).forEach(k=>{
+    try{
+      const v = localStorage.getItem(k);
+      if(v !== null) appData[k] = JSON.parse(v);
+    }catch(e){}
   });
+}
+
+/* 儲存：立即寫入 appData + localStorage，非同步同步 Firebase */
+let _saveTimer = null;
+function save(k, v){
+  appData[k] = v;
+  try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
+  if(_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(()=>{
+    updateSyncStatus('syncing');
+    const patch = {};
+    Object.keys(appData).forEach(key=>{ patch[key]=appData[key]; });
+    userRef.update(patch).then(()=>updateSyncStatus('online')).catch(()=>updateSyncStatus('offline'));
+  }, 600);
+}
+
+/* 向後相容 */
+function load(k,def){
+  return appData.hasOwnProperty(k) ? appData[k] : def;
 }
 
 /* ── 永遠回傳乾淨陣列，相容 Firebase 物件格式 ── */
@@ -1023,16 +1033,8 @@ function deleteStock(symbol){
 }
 
 function loadAllData(){
-  /* 修正：使用 K 的 value（如 'asset_stocks'），而非 key（'stocks'） */
-  Object.values(K).forEach(k=>{
-    try{
-      const v=localStorage.getItem(k);
-      if(v!==null) localData[k]=JSON.parse(v);
-    }catch{}
-  });
-  /* 也讀取 price_date */
-  try{const v=localStorage.getItem('price_date');if(v)localData['price_date']=JSON.parse(v);}catch{}
-  targetValue = load(K.target, 20000000);
+  loadFromStorage();
+  targetValue = appData[K.target] || 20000000;
 }
 
 function initUI(){
@@ -1070,27 +1072,49 @@ function initUI(){
   render();
 }
 
-userRef.on('value', (snapshot) => {
+function showDebug(){
+  const stocks = getStocks();
+  const ls = localStorage.getItem('asset_stocks');
+  alert(
+    '【診斷資訊】\n\n'+
+    'appData 股票數：'+stocks.length+'\n'+
+    'appData 股票：'+JSON.stringify(stocks)+'\n\n'+
+    'localStorage 原始值：\n'+(ls||'(空)')+'\n\n'+
+    'dataLoaded：'+dataLoaded+'\n'+
+    'Firebase 狀態：'+syncStatus
+  );
+}
+
+/* Firebase 初次載入：將雲端資料合併進 appData（雲端優先） */
+userRef.once('value').then(snapshot=>{
   const data = snapshot.val();
   if(data){
-    cloudData = data;
-    if(dataLoaded){
-      render();
-    }
+    Object.keys(appData).forEach(k=>{
+      if(data.hasOwnProperty(k)) appData[k] = data[k];
+    });
+    /* 也存回 localStorage */
+    Object.keys(appData).forEach(k=>{
+      try{ localStorage.setItem(k, JSON.stringify(appData[k])); }catch(e){}
+    });
+    targetValue = appData[K.target] || 20000000;
   }
   updateSyncStatus('online');
-}, (error) => {
-  console.error('Firebase error:', error);
-  updateSyncStatus('error', '同步失敗');
-});
+  if(dataLoaded) render();
+}).catch(()=>updateSyncStatus('offline'));
 
-userRef.on('disconnect', () => {
-  updateSyncStatus('offline');
-});
-
-userRef.on('connect', () => {
-  updateSyncStatus('online');
-});
+/* 監聽後續變更（其他裝置的更新） */
+userRef.on('value', snapshot=>{
+  if(!dataLoaded) return;          /* 初次載入已由 once() 處理 */
+  const data = snapshot.val();
+  if(!data) return;
+  /* 僅在 _saveTimer 不在跑（非本裝置觸發）時才更新 */
+  if(_saveTimer) return;
+  Object.keys(appData).forEach(k=>{
+    if(data.hasOwnProperty(k)) appData[k] = data[k];
+  });
+  targetValue = appData[K.target] || 20000000;
+  render();
+}, ()=>updateSyncStatus('offline'));
 
 loadAllData();
 initUI();
