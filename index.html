@@ -297,14 +297,13 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
     </div>
 
     <div id="stock-list">
-      <div class="stock-empty" id="stock-empty">尚無股票持仓<br>點擊下方新增你的股票</div>
+      <div class="stock-empty">尚無股票持倉<br>在下方新增你的股票</div>
     </div>
 
     <div class="add-stock-row">
-      <input type="text" id="new-stock-symbol" placeholder="代碼，例如 0050" maxlength="10">
+      <input type="text" id="new-stock-symbol" placeholder="股票代碼（必填）" maxlength="10">
       <input type="text" id="new-stock-name" placeholder="名稱（選填）" maxlength="20">
-      <input type="number" id="new-stock-shares" placeholder="持股數" min="0" style="max-width:100px">
-      <input type="number" id="new-stock-cost" placeholder="成本均價" min="0" step="0.01" style="max-width:110px">
+      <input type="number" id="new-stock-shares" placeholder="持股數（選填）" min="0">
       <button class="btn-add-stock" onclick="addStock()">＋ 新增</button>
     </div>
 
@@ -479,12 +478,23 @@ function localSave(){
   });
 }
 
-function toArr(v){if(Array.isArray(v))return v;if(v&&typeof v==='object')return Object.values(v);return[];}
+/* ── 永遠回傳乾淨陣列，相容 Firebase 物件格式 ── */
+function toArr(v){
+  if(!v) return [];
+  if(Array.isArray(v)) return v.filter(x=>x&&x.symbol);
+  if(typeof v==='object') return Object.values(v).filter(x=>x&&x.symbol);
+  return [];
+}
 function getStocks(){return toArr(load(K.stocks,[]));}
-function getStock(symbol){const s=getStocks();return s.find(x=>x.symbol===symbol)||null;}
-function getLumps(){return toArr(load(K.lumps,[]));}
-function clearStocks(){if(confirm('確定要清除所有股票資料嗎？')){{save(K.stocks,[]);render();}}}
-function getTotalLump(){return getLumps().reduce((s,i)=>s+i.amount,0);}
+function getLumps(){
+  const v=load(K.lumps,[]);
+  if(!v) return [];
+  if(Array.isArray(v)) return v;
+  if(typeof v==='object') return Object.values(v);
+  return [];
+}
+function clearStocks(){if(confirm('確定要清除所有股票資料嗎？')){save(K.stocks,[]);render();}}
+function getTotalLump(){return getLumps().reduce((s,i)=>s+(Number(i.amount)||0),0);}
 function getAge(){return parseInt(load(K.age,31))||31;}
 function getCash(){return parseFloat(load(K.cash,0))||0;}
 function getOther(){return parseFloat(load(K.other,0))||0;}
@@ -647,76 +657,93 @@ function updateStockSelect(){
   }
 }
 
+/* ════════════════════════════════════════════
+   股票卡片 — 完整重寫，純 DOM 操作，無模板字串
+   ════════════════════════════════════════════ */
+function makeEl(tag, props){
+  const el = document.createElement(tag);
+  Object.assign(el, props||{});
+  return el;
+}
+function makeField(labelText, inputEl){
+  const wrap = makeEl('div',{className:'stock-field'});
+  const lbl  = makeEl('label'); lbl.textContent = labelText;
+  wrap.appendChild(lbl);
+  wrap.appendChild(inputEl);
+  return wrap;
+}
+function makeInput(type, id, value, extra){
+  const el = makeEl('input',{type, id, oninput:()=>saveStocks()});
+  if(value!==undefined && value!=='') el.value = value;
+  Object.assign(el, extra||{});
+  return el;
+}
+function makeSelect(id, options, selectedVal){
+  const sel = makeEl('select',{id, className:'lump-select', onchange:()=>saveStocks()});
+  options.forEach(([val,text])=>{
+    const opt = makeEl('option',{value:val}); opt.textContent=text;
+    if(String(val)===String(selectedVal)) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  return sel;
+}
+
 function buildStockCard(s){
-  const sym   = String(s.symbol||'');
-  const price = getStockPrice(sym);
-  const shares= Number(s.shares)||0;
-  const cost  = Number(s.cost)||0;
-  const value = shares*(price||cost||0);
+  const sym     = String(s.symbol||'');
+  const price   = getStockPrice(sym);
+  const shares  = Number(s.shares)||0;
+  const cost    = Number(s.cost)||0;
+  const value   = shares*(price||cost||0);
   const dcaType = s.dca_type||'amount';
   const dcaFreq = Number(s.dca_freq)||1;
   const monthly = Number(s.monthly)||0;
   const retRate = Number(s.return)||8;
 
-  const card = document.createElement('div');
-  card.className = 'stock-card';
+  const card = makeEl('div',{className:'stock-card', id:'scard-'+sym});
 
-  /* ── header ── */
-  const hdr = document.createElement('div');
-  hdr.className = 'stock-header';
-  hdr.innerHTML =
-    `<div><span class="stock-name">${s.name||sym}</span>`+
-    `<span class="stock-symbol">&nbsp;${sym}</span></div>`+
-    `<div style="display:flex;align-items:center;gap:.5rem">`+
-    `<span class="stock-price" id="price-${sym}">${price?price.toFixed(2):'--'}</span>`+
-    `<button class="stock-del" onclick="deleteStock('${sym}')" title="刪除">×</button></div>`;
+  /* ── 標題列 ── */
+  const hdr  = makeEl('div',{className:'stock-header'});
+  const info = makeEl('div');
+  const nm   = makeEl('span',{className:'stock-name'}); nm.textContent = s.name||sym;
+  const sc   = makeEl('span',{className:'stock-symbol'}); sc.textContent = ' '+sym;
+  info.append(nm,sc);
+  const right = makeEl('div'); right.style.cssText='display:flex;align-items:center;gap:.5rem';
+  const priceSpan = makeEl('span',{className:'stock-price',id:'price-'+sym});
+  priceSpan.textContent = price ? price.toFixed(2) : '--';
+  const delBtn = makeEl('button',{className:'stock-del',title:'刪除'}); delBtn.textContent='×';
+  delBtn.onclick = ()=>deleteStock(sym);
+  right.append(priceSpan, delBtn);
+  hdr.append(info, right);
   card.appendChild(hdr);
 
-  /* ── row 1: shares / cost / value ── */
-  const r1 = document.createElement('div');
-  r1.className = 'stock-fields';
-  [
-    ['持股數量', `<input type="number" id="shares-${sym}" value="${shares||''}" placeholder="0" min="0" oninput="saveStocks()">`],
-    ['成本均價', `<input type="number" id="cost-${sym}"   value="${cost||''}"   placeholder="0" step="0.01" oninput="saveStocks()">`],
-    ['市值',     `<div class="field-value">${fmt(value)} 元</div>`],
-  ].forEach(([lbl,body])=>{
-    const f=document.createElement('div'); f.className='stock-field';
-    f.innerHTML=`<label>${lbl}</label>${body}`; r1.appendChild(f);
-  });
-  card.appendChild(r1);
+  /* ── 第一列：持股 / 成本 / 市值 ── */
+  const row1 = makeEl('div',{className:'stock-fields'});
+  const sharesInput = makeInput('number','shares-'+sym, shares||'', {placeholder:'0', min:0});
+  const costInput   = makeInput('number','cost-'+sym,   cost||'',   {placeholder:'0', step:0.01, min:0});
+  const valDiv  = makeEl('div',{className:'field-value'}); valDiv.textContent = fmt(value)+' 元';
+  row1.append(makeField('持股數量',sharesInput), makeField('成本均價',costInput), makeField('市值',valDiv));
+  card.appendChild(row1);
 
-  /* ── row 2: DCA settings ── */
-  const r2 = document.createElement('div');
-  r2.className = 'stock-fields';
-  r2.style.cssText = 'border-top:none;padding-top:0;margin-top:.5rem';
+  /* ── 第二列：定期投入 / 報酬率 / 總成本 ── */
+  const row2 = makeEl('div',{className:'stock-fields'});
+  row2.style.cssText='border-top:none;padding-top:0;margin-top:.5rem';
 
-  const dcaWrap = document.createElement('div');
-  dcaWrap.className = 'stock-field';
+  /* 定期投入整排 */
+  const dcaWrap = makeEl('div',{className:'stock-field'});
   dcaWrap.style.gridColumn = '1/-1';
-  dcaWrap.innerHTML =
-    `<label>定期投入設定</label>`+
-    `<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.3rem">`+
-      `<select id="dca-type-${sym}" class="lump-select" style="min-width:110px" onchange="saveStocks()">`+
-        `<option value="amount"${dcaType==='amount'?' selected':''}>定期定額（元）</option>`+
-        `<option value="shares"${dcaType==='shares'?' selected':''}>定期定股（股）</option>`+
-      `</select>`+
-      `<input type="number" id="monthly-${sym}" value="${monthly||''}" placeholder="${dcaType==='shares'?'每期股數':'每期金額'}" min="0" style="flex:1;min-width:90px" oninput="saveStocks()">`+
-      `<select id="dca-freq-${sym}" class="lump-select" style="min-width:80px" onchange="saveStocks()">`+
-        `<option value="1"${dcaFreq===1?' selected':''}>每月</option>`+
-        `<option value="3"${dcaFreq===3?' selected':''}>每季</option>`+
-        `<option value="12"${dcaFreq===12?' selected':''}>每年</option>`+
-      `</select>`+
-    `</div>`;
-  r2.appendChild(dcaWrap);
+  const dcaLbl = makeEl('label'); dcaLbl.textContent='定期投入設定';
+  const dcaRow = makeEl('div'); dcaRow.style.cssText='display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.3rem';
+  const typeSelect = makeSelect('dca-type-'+sym,[['amount','定期定額（元）'],['shares','定期定股（股）']],dcaType);
+  const amtInput   = makeInput('number','monthly-'+sym, monthly||'', {placeholder: dcaType==='shares'?'每期股數':'每期金額', min:0});
+  amtInput.style.cssText='flex:1;min-width:90px';
+  const freqSelect = makeSelect('dca-freq-'+sym,[['1','每月'],['3','每季'],['12','每年']],dcaFreq);
+  dcaRow.append(typeSelect, amtInput, freqSelect);
+  dcaWrap.append(dcaLbl, dcaRow);
 
-  [
-    ['年化報酬率 %', `<input type="number" id="return-${sym}" value="${retRate}" placeholder="8" step="0.1" min="0" max="30" oninput="saveStocks()">`],
-    ['總投入成本',   `<div class="field-value">${fmt(shares*cost)} 元</div>`],
-  ].forEach(([lbl,body])=>{
-    const f=document.createElement('div'); f.className='stock-field';
-    f.innerHTML=`<label>${lbl}</label>${body}`; r2.appendChild(f);
-  });
-  card.appendChild(r2);
+  const retInput  = makeInput('number','return-'+sym, retRate, {placeholder:'8', step:0.1, min:0, max:30});
+  const costDiv   = makeEl('div',{className:'field-value'}); costDiv.textContent=fmt(shares*cost)+' 元';
+  row2.append(dcaWrap, makeField('年化報酬率 %',retInput), makeField('總投入成本',costDiv));
+  card.appendChild(row2);
 
   return card;
 }
@@ -725,13 +752,24 @@ function renderStockList(){
   const list   = document.getElementById('stock-list');
   const stocks = getStocks();
   updateStockSelect();
-  list.innerHTML = '';
+
+  /* 清空 */
+  while(list.firstChild) list.removeChild(list.firstChild);
 
   if(!stocks.length){
-    list.innerHTML = '<div class="stock-empty">尚無股票持倉<br>在下方新增你的股票</div>';
+    const empty = makeEl('div',{className:'stock-empty'});
+    empty.innerHTML = '尚無股票持倉<br>在下方新增你的股票';
+    list.appendChild(empty);
     return;
   }
-  stocks.forEach(s=>{ try{ list.appendChild(buildStockCard(s)); }catch(e){ console.error('stock render error',s,e); } });
+
+  stocks.forEach(s=>{
+    try{
+      list.appendChild(buildStockCard(s));
+    }catch(e){
+      console.error('[renderStockList] 無法渲染股票:', JSON.stringify(s), e);
+    }
+  });
 }
 
 function render(){
@@ -938,33 +976,42 @@ async function fetchAllPrices(){
 }
 
 function addStock(){
-  const symbolInput=document.getElementById('new-stock-symbol');
-  const nameInput=document.getElementById('new-stock-name');
-  const symbol=symbolInput.value.trim().toUpperCase();
+  const symbolInput = document.getElementById('new-stock-symbol');
+  const nameInput   = document.getElementById('new-stock-name');
+  const sharesInput = document.getElementById('new-stock-shares');
+  const symbol = symbolInput.value.trim().toUpperCase();
+
   if(!symbol){
+    symbolInput.focus();
     symbolInput.style.borderColor='rgba(226,75,74,.5)';
     setTimeout(()=>symbolInput.style.borderColor='',1500);
     return;
   }
-  
-  const stocks=getStocks();
+
+  const stocks = getStocks();
   if(stocks.find(s=>s.symbol===symbol)){
-    alert('此股票已存在');
+    /* 已存在 → 改為滾動到該卡片提示使用者 */
+    const existing = document.getElementById('scard-'+symbol);
+    if(existing){ existing.scrollIntoView({behavior:'smooth',block:'center'}); existing.style.outline='2px solid var(--gold)'; setTimeout(()=>existing.style.outline='',1800); }
+    else{ alert('此股票已存在，請向上捲動查看'); }
     return;
   }
-  
-  const name=nameInput.value.trim();
-  const sharesInput=document.getElementById('new-stock-shares');
-  const costInput=document.getElementById('new-stock-cost');
-  const initShares=parseInt(sharesInput.value)||0;
-  const initCost=parseFloat(costInput.value)||0;
-  stocks.push({symbol,name,cost:initCost,shares:initShares,monthly:0,return:8,dca_type:'amount',dca_freq:1});
-  save(K.stocks,stocks);
 
-  symbolInput.value='';
-  nameInput.value='';
-  sharesInput.value='';
-  costInput.value='';
+  stocks.push({
+    symbol,
+    name: nameInput.value.trim(),
+    shares: parseInt(sharesInput.value)||0,
+    cost: 0,
+    monthly: 0,
+    return: 8,
+    dca_type: 'amount',
+    dca_freq: 1
+  });
+  save(K.stocks, stocks);
+
+  symbolInput.value = '';
+  nameInput.value   = '';
+  sharesInput.value = '';
   render();
 }
 
@@ -976,12 +1023,15 @@ function deleteStock(symbol){
 }
 
 function loadAllData(){
-  for(const k in K){
+  /* 修正：使用 K 的 value（如 'asset_stocks'），而非 key（'stocks'） */
+  Object.values(K).forEach(k=>{
     try{
       const v=localStorage.getItem(k);
       if(v!==null) localData[k]=JSON.parse(v);
     }catch{}
-  }
+  });
+  /* 也讀取 price_date */
+  try{const v=localStorage.getItem('price_date');if(v)localData['price_date']=JSON.parse(v);}catch{}
   targetValue = load(K.target, 20000000);
 }
 
