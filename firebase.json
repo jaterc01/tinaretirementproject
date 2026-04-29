@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "site": "tinaretirement-18e44",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "README.md",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

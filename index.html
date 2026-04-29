@@ -195,6 +195,19 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 .btn-sm{background:transparent;border:1px solid var(--br);color:var(--ts);border-radius:8px;padding:.35rem .75rem;font-size:12px;font-family:var(--fu);cursor:pointer;transition:all .2s}
 .btn-sm:hover{border-color:rgba(226,75,74,.4);color:#E24B4A}
 
+body.app-locked{overflow:hidden}
+.password-gate{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:1.5rem;background:linear-gradient(135deg,rgba(245,247,250,.98),rgba(255,255,255,.96));z-index:200}
+body.app-locked .password-gate{display:flex}
+body.app-locked .page{display:none}
+.password-card{width:min(100%,420px);background:var(--s1);border:1px solid var(--gb);border-radius:24px;padding:2rem;box-shadow:0 12px 40px rgba(0,0,0,.10);text-align:center}
+.password-eyebrow{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:.8rem}
+.password-card h2{font-family:var(--fd);font-size:2rem;font-weight:300;color:var(--gl);margin-bottom:.5rem}
+.password-copy{font-size:13px;color:var(--ts);margin-bottom:1.25rem}
+.password-form{display:flex;flex-direction:column;gap:.75rem}
+.password-form input{width:100%;background:var(--bg);border:1px solid var(--br);border-radius:12px;padding:.85rem 1rem;font-size:1rem;font-family:var(--fu);font-weight:300;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.password-form input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,150,58,.12)}
+.password-hint{min-height:1.2rem;font-size:12px;color:var(--ts);margin-top:.85rem}
+.password-hint.error{color:#E24B4A}
 @media(max-width:600px){
   .mini-cards{grid-template-columns:1fr 1fr}
   .mini-c:last-child{grid-column:1/-1}
@@ -206,7 +219,19 @@ input[type=text]::placeholder,input[type=search]::placeholder{color:var(--tm)}
 }
 </style>
 </head>
-<body>
+<body class="app-locked">
+<div class="password-gate" id="password-gate" aria-live="polite">
+  <div class="password-card">
+    <div class="password-eyebrow">私人頁面</div>
+    <h2>請輸入密碼</h2>
+    <p class="password-copy">此退休規劃頁面已加上密碼保護。</p>
+    <form class="password-form" onsubmit="unlockApp(event)">
+      <input type="password" id="password-input" placeholder="請輸入密碼" autocomplete="current-password">
+      <button type="submit" class="btn-add">進入頁面</button>
+    </form>
+    <p class="password-hint" id="password-message">請輸入密碼後查看內容</p>
+  </div>
+</div>
 <div class="page">
 
   <div class="toast" id="toast">
@@ -415,6 +440,40 @@ const db = firebase.database();
 const userRef = db.ref('userData');
 
 let syncStatus = 'connecting';
+const APP_PASSWORD = 'tina0630';
+const ACCESS_KEY = 'tina_retirement_access';
+
+function unlockApp(event){
+  if(event) event.preventDefault();
+  const input = document.getElementById('password-input');
+  const message = document.getElementById('password-message');
+  const value = input.value;
+  if(value === APP_PASSWORD){
+    sessionStorage.setItem(ACCESS_KEY, 'granted');
+    document.body.classList.remove('app-locked');
+    message.textContent = '驗證成功，正在進入頁面';
+    message.classList.remove('error');
+    input.value = '';
+    return;
+  }
+  message.textContent = '密碼錯誤，請再試一次';
+  message.classList.add('error');
+  input.focus();
+  input.select();
+}
+
+function applyPasswordGate(){
+  const granted = sessionStorage.getItem(ACCESS_KEY) === 'granted';
+  const message = document.getElementById('password-message');
+  if(granted){
+    document.body.classList.remove('app-locked');
+    message.classList.remove('error');
+    message.textContent = '驗證成功';
+    return;
+  }
+  document.body.classList.add('app-locked');
+  setTimeout(()=>document.getElementById('password-input')?.focus(), 50);
+}
 
 function updateSyncStatus(status, text){
   syncStatus = status;
@@ -1117,6 +1176,7 @@ userRef.on('value', snapshot=>{
 }, ()=>updateSyncStatus('offline'));
 
 loadAllData();
+applyPasswordGate();
 initUI();
 </script>
 </body>

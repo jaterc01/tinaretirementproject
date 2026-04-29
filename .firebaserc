@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "tinaretirement-18e44"
+  },
+  "targets": {
+    "tinaretirement-18e44": {
+      "hosting": {
+        "site": [
+          "tinaretirement-18e44"
+        ]
+      }
+    }
+  }
+}
